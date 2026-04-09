@@ -16,14 +16,12 @@ import {
   Heart,
   Phone,
   Mail,
-  CalendarDays,
-  Clock,
-  Crown,
   Star,
-  Zap,
+  ShieldCheck,
+  Share2,
 } from 'lucide-react'
-import type { Listing } from './featured-carousel'
-import { formatPrice } from './featured-carousel'
+import type { Listing } from './listing-card'
+import { formatPrice } from './listing-card'
 
 interface ListingDetailProps {
   listing: Listing | null
@@ -42,21 +40,15 @@ export function ListingDetail({
 }: ListingDetailProps) {
   if (!listing) return null
 
-  const tierConfig: Record<string, { icon: typeof Crown; color: string; label: string }> = {
-    premium: { icon: Crown, color: 'text-amber-500', label: 'Premium' },
-    featured: { icon: Star, color: 'text-emerald-500', label: 'Featured' },
-    spotlight: { icon: Zap, color: 'text-sky-500', label: 'Spotlight' },
-    standard: { icon: Star, color: 'text-gray-400', label: 'Standard' },
-  }
-
-  const tier = tierConfig[listing.tier] || tierConfig.standard
-  const TierIcon = tier.icon
+  // Generate consistent rating from id
+  const hash = listing.id.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0)
+  const rating = (3.5 + (hash % 15) / 10).toFixed(1)
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto p-0 gap-0">
+      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto p-0 gap-0 rounded-xl">
         {/* Image */}
-        <div className="relative aspect-[16/10] w-full overflow-hidden rounded-t-lg">
+        <div className="relative aspect-[16/10] w-full overflow-hidden">
           <Image
             src={listing.imageUrl}
             alt={listing.title}
@@ -65,62 +57,68 @@ export function ListingDetail({
             sizes="(max-width: 640px) 100vw, 500px"
             priority
           />
-          {listing.tier !== 'standard' && (
-            <Badge
-              className={`absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-foreground border-0 rounded-full text-xs px-2.5 gap-1 z-10`}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+
+          {/* Action buttons on image */}
+          <div className="absolute top-3 right-3 flex items-center gap-2 z-10">
+            <button className="h-8 w-8 rounded-full bg-white/90 flex items-center justify-center">
+              <Share2 className="size-4 text-gray-600" />
+            </button>
+            <button
+              onClick={onToggleFavorite}
+              className="h-8 w-8 rounded-full bg-white/90 flex items-center justify-center"
             >
-              <TierIcon className={`size-3.5 ${tier.color}`} />
-              {tier.label}
-            </Badge>
-          )}
+              <Heart
+                className={`size-4 ${isFavorited ? 'fill-red-500 text-red-500' : 'text-gray-600'}`}
+              />
+            </button>
+          </div>
+
+          {/* Price overlay */}
+          <div className="absolute bottom-3 left-3 z-10">
+            <div className="bg-[#006633] text-white px-3 py-1.5 rounded-lg">
+              <span className="text-lg font-bold">{formatPrice(listing.price)}</span>
+              <span className="text-xs text-white/80"> / {listing.priceUnit}</span>
+            </div>
+          </div>
         </div>
 
         {/* Content */}
-        <div className="p-4 space-y-4">
-          <DialogHeader className="text-left space-y-2 p-0">
+        <div className="p-4 space-y-3">
+          <DialogHeader className="text-left space-y-1 p-0">
             <div className="flex items-start justify-between gap-2">
-              <div className="space-y-1">
-                <DialogTitle className="text-lg leading-tight">
+              <div className="flex-1">
+                <DialogTitle className="text-base font-bold leading-tight text-gray-900">
                   {listing.title}
                 </DialogTitle>
-                <div className="flex items-center gap-1.5 text-muted-foreground text-sm">
+                <div className="flex items-center gap-1.5 text-gray-500 text-sm mt-1">
                   <MapPin className="size-3.5 shrink-0" />
-                  <span>{listing.location}</span>
+                  <span className="text-xs">{listing.location}</span>
                 </div>
               </div>
-              <div className="text-right shrink-0">
-                <p className="text-emerald-600 font-bold text-lg">
-                  {formatPrice(listing.price)}
-                </p>
-                <p className="text-muted-foreground text-xs">per {listing.priceUnit}</p>
+              <div className="flex items-center gap-1 bg-amber-50 px-2 py-1 rounded-lg shrink-0">
+                <Star className="size-4 fill-amber-400 text-amber-400" />
+                <span className="text-sm font-bold text-gray-800">{rating}</span>
               </div>
             </div>
           </DialogHeader>
 
-          <Separator />
-
-          <div className="flex flex-wrap gap-2">
-            <Badge variant="secondary" className="rounded-full text-xs">
+          {/* Badges row */}
+          <div className="flex flex-wrap gap-1.5">
+            <Badge className="bg-[#006633]/10 text-[#006633] border-0 rounded-md text-[11px] font-medium">
               {listing.category}
             </Badge>
-            <Badge variant="outline" className="rounded-full text-xs gap-1">
-              <CalendarDays className="size-3" />
-              {new Date(listing.createdAt).toLocaleDateString('en-ZM', {
-                month: 'short',
-                day: 'numeric',
-                year: 'numeric',
-              })}
-            </Badge>
-            <Badge variant="outline" className="rounded-full text-xs gap-1">
-              <Clock className="size-3" />
-              {new Date(listing.createdAt).toLocaleTimeString('en-ZM', {
-                hour: '2-digit',
-                minute: '2-digit',
-              })}
-            </Badge>
+            {listing.tier !== 'standard' && (
+              <Badge className="bg-[#006633]/10 text-[#006633] border-0 rounded-md text-[11px] font-medium gap-1">
+                <ShieldCheck className="size-3" />
+                Verified
+              </Badge>
+            )}
           </div>
 
-          <DialogDescription className="text-sm leading-relaxed text-foreground/80 whitespace-pre-wrap">
+          <Separator />
+
+          <DialogDescription className="text-[13px] leading-relaxed text-gray-600 whitespace-pre-wrap">
             {listing.description}
           </DialogDescription>
 
@@ -129,64 +127,61 @@ export function ListingDetail({
           {/* Contact Info */}
           {(listing.contactPhone || listing.contactEmail) && (
             <div className="space-y-2">
-              <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              <h4 className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
                 Contact Information
               </h4>
-              <div className="space-y-1.5">
+              <div className="space-y-2">
                 {listing.contactPhone && (
-                  <div className="flex items-center gap-2 text-sm">
-                    <Phone className="size-3.5 text-muted-foreground" />
-                    <a
-                      href={`tel:${listing.contactPhone}`}
-                      className="text-emerald-600 hover:underline"
-                    >
-                      {listing.contactPhone}
-                    </a>
-                  </div>
+                  <a
+                    href={`tel:${listing.contactPhone}`}
+                    className="flex items-center gap-3 p-2.5 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                  >
+                    <div className="w-8 h-8 rounded-full bg-[#006633] flex items-center justify-center">
+                      <Phone className="size-3.5 text-white" />
+                    </div>
+                    <span className="text-sm font-medium text-gray-700">{listing.contactPhone}</span>
+                  </a>
                 )}
                 {listing.contactEmail && (
-                  <div className="flex items-center gap-2 text-sm">
-                    <Mail className="size-3.5 text-muted-foreground" />
-                    <a
-                      href={`mailto:${listing.contactEmail}`}
-                      className="text-emerald-600 hover:underline"
-                    >
-                      {listing.contactEmail}
-                    </a>
-                  </div>
+                  <a
+                    href={`mailto:${listing.contactEmail}`}
+                    className="flex items-center gap-3 p-2.5 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                  >
+                    <div className="w-8 h-8 rounded-full bg-[#006633] flex items-center justify-center">
+                      <Mail className="size-3.5 text-white" />
+                    </div>
+                    <span className="text-sm font-medium text-gray-700">{listing.contactEmail}</span>
+                  </a>
                 )}
               </div>
             </div>
           )}
 
           {/* Actions */}
-          <div className="flex gap-2 pt-1">
+          <div className="flex gap-2 pt-1 pb-1">
             <Button
               variant="outline"
-              className="flex-1 gap-1.5"
+              className="flex-1 gap-1.5 rounded-lg h-10 border-gray-200"
               onClick={onToggleFavorite}
             >
               <Heart
-                className={`size-4 ${
-                  isFavorited ? 'fill-red-500 text-red-500' : ''
-                }`}
+                className={`size-4 ${isFavorited ? 'fill-red-500 text-red-500' : ''}`}
               />
               {isFavorited ? 'Saved' : 'Save'}
             </Button>
-            {listing.contactPhone && (
+            {listing.contactPhone ? (
               <Button
-                className="flex-1 gap-1.5 bg-emerald-500 hover:bg-emerald-600"
+                className="flex-1 gap-1.5 bg-[#006633] hover:bg-[#004d26] rounded-lg h-10"
                 asChild
               >
                 <a href={`tel:${listing.contactPhone}`}>
                   <Phone className="size-4" />
-                  Contact
+                  Call Now
                 </a>
               </Button>
-            )}
-            {listing.contactEmail && !listing.contactPhone && (
+            ) : listing.contactEmail ? (
               <Button
-                className="flex-1 gap-1.5 bg-emerald-500 hover:bg-emerald-600"
+                className="flex-1 gap-1.5 bg-[#006633] hover:bg-[#004d26] rounded-lg h-10"
                 asChild
               >
                 <a href={`mailto:${listing.contactEmail}`}>
@@ -194,7 +189,7 @@ export function ListingDetail({
                   Email
                 </a>
               </Button>
-            )}
+            ) : null}
           </div>
         </div>
       </DialogContent>

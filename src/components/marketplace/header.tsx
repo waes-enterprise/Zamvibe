@@ -1,74 +1,109 @@
 'use client'
 
-import { Search, Plus, Heart } from 'lucide-react'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
+import { Search, MapPin, SlidersHorizontal, ChevronDown } from 'lucide-react'
+import { useState } from 'react'
 
 interface HeaderProps {
   searchQuery: string
   onSearchChange: (query: string) => void
-  favoritesCount: number
-  onOpenFavorites: () => void
-  onOpenPostAd: () => void
+  activeView: 'list' | 'map'
+  onViewChange: (view: 'list' | 'map') => void
 }
 
 export function Header({
   searchQuery,
   onSearchChange,
-  favoritesCount,
-  onOpenFavorites,
-  onOpenPostAd,
+  activeView,
+  onViewChange,
 }: HeaderProps) {
+  const [showFilters, setShowFilters] = useState(false)
+
   return (
-    <header className="sticky top-0 z-40 h-12 flex items-center px-3 gap-2 bg-white/80 backdrop-blur-md border-b border-border">
-      {/* Logo */}
-      <div className="flex items-center gap-1 shrink-0">
-        <div className="w-6 h-6 rounded-md bg-emerald-500 flex items-center justify-center">
-          <span className="text-white font-bold text-xs">H</span>
+    <header className="sticky top-0 z-40 bg-[#006633]">
+      {/* Top bar */}
+      <div className="flex items-center px-4 py-3 gap-3">
+        {/* Logo */}
+        <div className="shrink-0">
+          <h1 className="text-white font-bold text-lg tracking-tight">
+            Housemate<span className="text-[#4ade80]">.zm</span>
+          </h1>
         </div>
-        <span className="font-bold text-sm hidden sm:block">
-          Housemate <span className="text-emerald-600">ZM</span>
-        </span>
+
+        {/* Spacer */}
+        <div className="flex-1" />
+
+        {/* Sign In button */}
+        <button className="px-4 py-1.5 rounded-full bg-white text-[#006633] text-xs font-semibold hover:bg-gray-100 transition-colors">
+          Sign In
+        </button>
       </div>
 
-      {/* Search */}
-      <div className="flex-1 max-w-md mx-auto">
+      {/* Search bar */}
+      <div className="px-4 pb-3">
         <div className="relative">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
-          <Input
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
+          <input
             type="text"
-            placeholder="Search listings..."
+            placeholder="Search location, property type..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="h-8 pl-8 pr-3 text-sm rounded-full bg-muted/50 border-0 focus-visible:ring-1 focus-visible:ring-emerald-500/50"
+            className="w-full h-10 pl-9 pr-4 text-sm rounded-lg bg-white text-gray-800 placeholder:text-gray-400 outline-none"
           />
         </div>
       </div>
 
-      {/* Actions */}
-      <div className="flex items-center gap-1 shrink-0">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-8 px-2 text-xs font-medium hidden sm:flex"
-          onClick={onOpenPostAd}
+      {/* Filter buttons row */}
+      <div className="px-4 pb-3 flex items-center gap-2 overflow-x-auto scrollbar-none">
+        <button
+          onClick={() => setShowFilters(!showFilters)}
+          className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-[#004d26] text-white text-xs font-medium whitespace-nowrap shrink-0"
         >
-          <Plus className="size-3.5 mr-1" />
-          Post Ad
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8 relative"
-          onClick={onOpenFavorites}
-        >
-          <Heart className="size-4" />
-          {favoritesCount > 0 && (
-            <span className="absolute -top-0.5 -right-0.5 h-4 min-w-4 px-1 text-[10px] font-bold bg-emerald-500 text-white rounded-full flex items-center justify-center">
-              {favoritesCount > 9 ? '9+' : favoritesCount}
-            </span>
-          )}
-        </Button>
+          <SlidersHorizontal className="size-3" />
+          Filters
+        </button>
+
+        <button className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-[#004d26] text-white text-xs font-medium whitespace-nowrap shrink-0">
+          <MapPin className="size-3" />
+          Where
+          <ChevronDown className="size-3" />
+        </button>
+
+        <button className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-[#004d26] text-white text-xs font-medium whitespace-nowrap shrink-0">
+          Type
+          <ChevronDown className="size-3" />
+        </button>
+
+        <button className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-[#004d26] text-white text-xs font-medium whitespace-nowrap shrink-0">
+          Price Range
+          <ChevronDown className="size-3" />
+        </button>
+
+        {/* Spacer */}
+        <div className="flex-1" />
+
+        {/* List / Map toggle */}
+        <div className="flex items-center rounded-full bg-[#004d26] p-0.5 shrink-0">
+          <button
+            onClick={() => onViewChange('list')}
+            className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+              activeView === 'list'
+                ? 'bg-white text-[#006633]'
+                : 'text-white/70 hover:text-white'
+            }`}
+          >
+            List
+          </button>
+          <button
+            onClick={() => onViewChange('map')}
+            className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+              activeView === 'map'
+                ? 'bg-white text-[#006633]'
+                : 'text-white/70 hover:text-white'
+            }`}
+          >
+            Map
+          </button>
+        </div>
       </div>
     </header>
   )
