@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client'
+import { hashPassword } from '../src/lib/auth'
 
 const db = new PrismaClient()
 
@@ -268,19 +269,85 @@ const listings = [
   },
 ]
 
+const categories = [
+  { name: "Rooms", slug: "rooms", icon: "BedDouble", sortOrder: 1 },
+  { name: "Farms", slug: "farms", icon: "Wheat", sortOrder: 2 },
+  { name: "Offices", slug: "offices", icon: "Building2", sortOrder: 3 },
+  { name: "Storage", slug: "storage", icon: "Archive", sortOrder: 4 },
+  { name: "Event Spaces", slug: "event-spaces", icon: "PartyPopper", sortOrder: 5 },
+  { name: "Garages", slug: "garages", icon: "Car", sortOrder: 6 },
+  { name: "Warehouses", slug: "warehouses", icon: "Warehouse", sortOrder: 7 },
+  { name: "Land", slug: "land", icon: "Mountain", sortOrder: 8 },
+  { name: "Shops", slug: "shops", icon: "Store", sortOrder: 9 },
+  { name: "Parking", slug: "parking", icon: "CircleParking", sortOrder: 10 },
+  { name: "Other", slug: "other", icon: "MoreHorizontal", sortOrder: 11 },
+]
+
 async function main() {
   console.log('Seeding database...')
 
   // Clear existing data
   await db.favorite.deleteMany()
+  await db.activityLog.deleteMany()
+  await db.siteSetting.deleteMany()
   await db.listing.deleteMany()
+  await db.category.deleteMany()
 
+  // Create admin user
+  const adminExists = await db.user.findUnique({ where: { email: 'admin@housematezm.com' } })
+  if (!adminExists) {
+    const adminPassword = await hashPassword('Admin@123')
+    await db.user.create({
+      data: {
+        name: 'System Admin',
+        email: 'admin@housematezm.com',
+        password: adminPassword,
+        role: 'admin',
+      },
+    })
+    console.log('  ✓ Created admin user: admin@housematezm.com')
+  } else {
+    console.log('  ✓ Admin user already exists')
+  }
+
+  // Create categories
+  const categoryMap = new Map<string, string>()
+  for (const cat of categories) {
+    const created = await db.category.create({ data: cat })
+    categoryMap.set(cat.name, created.id)
+    console.log(`  ✓ Created category: ${cat.name}`)
+  }
+
+  // Create listings with category links
   for (const listing of listings) {
-    await db.listing.create({ data: listing })
+    const categoryId = categoryMap.get(listing.category)
+    await db.listing.create({
+      data: {
+        ...listing,
+        categoryId: categoryId || null,
+      },
+    })
     console.log(`  ✓ Created: ${listing.title}`)
   }
 
-  console.log(`\n✅ Seeded ${listings.length} listings successfully!`)
+  // Create default site settings
+  const settings = [
+    { key: 'site_name', value: 'Housemate ZM' },
+    { key: 'site_description', value: "Premium marketplace for renting anything in Zambia" },
+    { key: 'contact_email', value: 'info@housematezm.com' },
+    { key: 'contact_phone', value: '+260977000000' },
+    { key: 'default_currency', value: 'ZMW' },
+    { key: 'listings_per_page', value: '12' },
+    { key: 'allow_registrations', value: 'true' },
+    { key: 'require_listing_approval', value: 'false' },
+    { key: 'maintenance_mode', value: 'false' },
+  ]
+  for (const setting of settings) {
+    await db.siteSetting.create({ data: setting })
+  }
+  console.log('  ✓ Created site settings')
+
+  console.log(`\n✅ Seeded ${listings.length} listings, ${categories.length} categories, and admin user successfully!`)
 }
 
 main()
