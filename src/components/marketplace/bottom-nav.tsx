@@ -1,6 +1,7 @@
 'use client'
 
 import { Home, Heart, MessageCircle, UserCircle } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
 export type TabType = 'explore' | 'saved' | 'inbox' | 'profile'
 
@@ -19,9 +20,19 @@ const tabs: { id: TabType; label: string; icon: typeof Home }[] = [
 ]
 
 export function BottomNav({ activeTab, onTabChange, savedCount, onOpenFavorites }: BottomNavProps) {
+  const router = useRouter()
+
   const handleClick = (tab: TabType) => {
     if (tab === 'saved') {
       onOpenFavorites()
+      return
+    }
+    if (tab === 'profile') {
+      router.push('/profile')
+      return
+    }
+    if (tab === 'inbox') {
+      // Future: inbox page
       return
     }
     onTabChange(tab)

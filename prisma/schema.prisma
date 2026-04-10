@@ -7,6 +7,20 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id            String   @id @default(cuid())
+  name          String
+  email         String   @unique
+  password      String
+  phone         String?
+  avatarUrl     String?
+  role          String   @default("user")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  favorites     Favorite[]
+  listings      Listing[]
+}
+
 model Listing {
   id           String   @id @default(cuid())
   title        String
@@ -22,13 +36,17 @@ model Listing {
   isFeatured   Boolean  @default(false)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+  ownerId      String?
+  owner        User?    @relation(fields: [ownerId], references: [id], onDelete: SetNull)
   favorites    Favorite[]
 }
 
 model Favorite {
   id        String   @id @default(cuid())
   listingId String
-  sessionId String
+  sessionId String?
+  userId    String?
   createdAt DateTime @default(now())
   listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

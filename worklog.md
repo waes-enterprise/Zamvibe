@@ -89,3 +89,35 @@ Built a complete, production-ready marketplace web application called **Housemat
 - `src/app/page.tsx` - Main homepage
 - `src/app/layout.tsx` - Updated metadata
 - `next.config.ts` - Added image domains
+---
+Task ID: 1
+Agent: main
+Task: Add database authentication to Housemate ZM webapp
+
+Work Log:
+- Installed bcryptjs and jose packages for password hashing and JWT tokens
+- Updated Prisma schema: added User model (id, name, email, password, phone, avatarUrl, role, timestamps), added userId/ownerId to Favorite/Listing models
+- Pushed schema to SQLite database with prisma db push
+- Created src/lib/auth.ts: PBKDF2 password hashing (crypto module), JWT token creation/verification (jose library)
+- Created 4 auth API routes:
+  - POST /api/auth/register - validates input, checks duplicate email, hashes password, creates user, sets JWT cookie
+  - POST /api/auth/login - validates credentials, verifies password, creates JWT session cookie
+  - POST /api/auth/logout - clears auth cookie
+  - GET /api/auth/session - returns current user from JWT cookie
+- Created /auth/signin page with email/password form, show/hide toggle, error handling
+- Created /auth/signup page with name/email/phone/password/confirm fields, validation, error handling
+- Created /profile page with user avatar, stats (saved/listings/reviews), info sections, sign out
+- Updated Header component: detects auth state, shows user avatar dropdown (profile/link/sign out) when logged in, "Sign In" link when not
+- Updated BottomNav: Profile tab now navigates to /profile page
+- Updated favorites API to support both authenticated (JWT cookie) and anonymous (sessionId) users
+- Updated page.tsx to check auth state and pass it through for favorites
+- Verified all endpoints with curl: register ✅, login ✅, session ✅, logout ✅, all pages ✅
+
+Stage Summary:
+- Full JWT-based authentication system implemented
+- User model with Prisma ORM and SQLite
+- Password hashing with Node.js crypto PBKDF2
+- Sign In / Sign Up / Profile pages
+- Header with auth-aware UI
+- Favorites work for both logged-in and anonymous users
+- All 10 API endpoints tested and working

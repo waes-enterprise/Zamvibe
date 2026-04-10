@@ -96,12 +96,30 @@ export default function Home() {
     fetchData()
   }, [])
 
-  // Fetch favorites on mount
+  // Auth state
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+
+  // Check auth on mount
+  useEffect(() => {
+    async function checkAuth() {
+      try {
+        const res = await fetch('/api/auth/session')
+        const data = await res.json()
+        setIsAuthenticated(!!data.user)
+      } catch {
+        // Not authenticated
+      }
+    }
+    checkAuth()
+  }, [])
+
+  // Fetch favorites on mount and when auth changes
   useEffect(() => {
     async function fetchFavorites() {
-      if (!sessionId) return
       try {
-        const res = await fetch(`/api/favorites?sessionId=${sessionId}`)
+        // Auth cookie is sent automatically; fallback to sessionId for anonymous
+        const urlParam = isAuthenticated ? '' : `?sessionId=${sessionId}`
+        const res = await fetch(`/api/favorites${urlParam}`)
         const data = await res.json()
         setFavoriteListings(data)
         setFavoriteIds(new Set(data.map((f: Listing) => f.id)))
@@ -111,7 +129,7 @@ export default function Home() {
     }
 
     fetchFavorites()
-  }, [sessionId])
+  }, [sessionId, isAuthenticated])
 
   // Filter listings based on search and category
   const filteredListings = useMemo(() => {
@@ -134,19 +152,17 @@ export default function Home() {
     return filtered
   }, [listings, activeCategory, searchQuery])
 
-  // Toggle favorite
+  // Toggle favorite (works for both auth and anonymous)
   const toggleFavorite = useCallback(
     async (listing: Listing) => {
-      if (!sessionId) return
-
       const isFav = favoriteIds.has(listing.id)
 
       try {
         if (isFav) {
-          await fetch(
-            `/api/favorites?listingId=${listing.id}&sessionId=${sessionId}`,
-            { method: 'DELETE' }
-          )
+          const urlParam = isAuthenticated
+            ? `?listingId=${listing.id}`
+            : `?listingId=${listing.id}&sessionId=${sessionId}`
+          await fetch(`/api/favorites${urlParam}`, { method: 'DELETE' })
           setFavoriteIds((prev) => {
             const next = new Set(prev)
             next.delete(listing.id)
@@ -157,7 +173,7 @@ export default function Home() {
           await fetch('/api/favorites', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ listingId: listing.id, sessionId }),
+            body: JSON.stringify({ listingId: listing.id, sessionId: isAuthenticated ? undefined : sessionId }),
           })
           setFavoriteIds((prev) => new Set(prev).add(listing.id))
           setFavoriteListings((prev) => [listing, ...prev])
@@ -166,17 +182,16 @@ export default function Home() {
         console.error('Failed to toggle favorite')
       }
     },
-    [sessionId, favoriteIds]
+    [sessionId, isAuthenticated, favoriteIds]
   )
 
   const removeFavorite = useCallback(
     async (listingId: string) => {
-      if (!sessionId) return
       try {
-        await fetch(
-          `/api/favorites?listingId=${listingId}&sessionId=${sessionId}`,
-          { method: 'DELETE' }
-        )
+        const urlParam = isAuthenticated
+          ? `?listingId=${listingId}`
+          : `?listingId=${listingId}&sessionId=${sessionId}`
+        await fetch(`/api/favorites${urlParam}`, { method: 'DELETE' })
         setFavoriteIds((prev) => {
           const next = new Set(prev)
           next.delete(listingId)
@@ -187,7 +202,7 @@ export default function Home() {
         console.error('Failed to remove favorite')
       }
     },
-    [sessionId]
+    [sessionId, isAuthenticated]
   )
 
   const handleSelectListing = useCallback((listing: Listing) => {
@@ -205,6 +220,7 @@ export default function Home() {
         onSearchChange={setSearchQuery}
         activeView={activeView}
         onViewChange={setActiveView}
+        onOpenProfile={() => setActiveTab('profile')}
       />
 
       {/* Main Content */}
