@@ -143,7 +143,7 @@ export default function ProfilePage() {
             <p className="text-lg font-bold text-gray-900">{favoriteCount}</p>
             <p className="text-[10px] text-gray-500">Saved</p>
           </div>
-          <Link href="/" className="bg-white rounded-xl p-4 text-center shadow-sm border border-gray-100 hover:bg-gray-50 transition-colors">
+          <Link href="/my-listings" className="bg-white rounded-xl p-4 text-center shadow-sm border border-gray-100 hover:bg-gray-50 transition-colors">
             <ShieldCheck className="size-5 text-[#006633] mx-auto mb-1" />
             <p className="text-lg font-bold text-gray-900">{listingCount}</p>
             <p className="text-[10px] text-gray-500">Listings</p>
@@ -203,14 +203,14 @@ export default function ProfilePage() {
         {/* Actions */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 divide-y divide-gray-50">
           <Link
-            href="/"
+            href="/saved"
             className="w-full flex items-center gap-3 px-4 py-3.5 hover:bg-gray-50 transition-colors"
           >
             <Heart className="size-4 text-red-500" />
             <span className="text-sm font-medium text-gray-700">My Saved Listings</span>
           </Link>
           <Link
-            href="/"
+            href="/profile/edit"
             className="w-full flex items-center gap-3 px-4 py-3.5 hover:bg-gray-50 transition-colors"
           >
             <Settings className="size-4 text-gray-500" />

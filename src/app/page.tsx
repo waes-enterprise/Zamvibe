@@ -8,6 +8,7 @@ import { ListingDetail } from '@/components/marketplace/listing-detail'
 import { FavoritesSheet } from '@/components/marketplace/favorites-sheet'
 import { BottomNav, type TabType } from '@/components/marketplace/bottom-nav'
 import { ChevronRight } from 'lucide-react'
+import Link from 'next/link'
 import type { Listing } from '@/components/marketplace/listing-card'
 
 function getSessionId(): string {
@@ -22,10 +23,10 @@ function getSessionId(): string {
 
 // Section configuration matching the screenshot
 const sections = [
-  { key: 'all', title: 'All Collection', description: 'Browse all available listings' },
-  { key: 'budget', title: 'Budget Friendly', description: 'Affordable options under K3,000' },
-  { key: 'executive', title: 'Executive Living', description: 'Premium properties for discerning tenants' },
-  { key: 'top', title: 'Top Rated', description: 'Highest rated properties by users' },
+  { key: 'all', title: 'All Collection', description: 'Browse all available listings', link: '/explore' },
+  { key: 'budget', title: 'Budget Friendly', description: 'Affordable options under K3,000', link: '/explore?maxPrice=3000' },
+  { key: 'executive', title: 'Executive Living', description: 'Premium properties for discerning tenants', link: '/explore?minPrice=5000' },
+  { key: 'top', title: 'Top Rated', description: 'Highest rated properties by users', link: '/explore?sort=top' },
 ]
 
 function getListingsForSection(sectionKey: string, listings: Listing[]): Listing[] {
@@ -257,10 +258,10 @@ export default function Home() {
                         <h2 className="text-sm font-bold text-gray-900">{section.title}</h2>
                         <p className="text-[11px] text-gray-400 mt-0.5">{section.description}</p>
                       </div>
-                      <button className="flex items-center gap-0.5 text-[#006633] text-xs font-semibold">
+                      <Link href={section.link} className="flex items-center gap-0.5 text-[#006633] text-xs font-semibold hover:text-[#004d26] transition-colors">
                         See all
                         <ChevronRight className="size-3.5" />
-                      </button>
+                      </Link>
                     </div>
                     <ListingGrid
                       listings={Array(6).fill({}) as unknown as Listing[]}
@@ -283,10 +284,10 @@ export default function Home() {
                       <h2 className="text-sm font-bold text-gray-900">{section.title}</h2>
                       <p className="text-[11px] text-gray-400 mt-0.5">{section.description}</p>
                     </div>
-                    <button className="flex items-center gap-0.5 text-[#006633] text-xs font-semibold hover:text-[#004d26] transition-colors">
+                    <Link href={section.link} className="flex items-center gap-0.5 text-[#006633] text-xs font-semibold hover:text-[#004d26] transition-colors">
                       See all
                       <ChevronRight className="size-3.5" />
-                    </button>
+                    </Link>
                   </div>
 
                   {/* Section listings */}

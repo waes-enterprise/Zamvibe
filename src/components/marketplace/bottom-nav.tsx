@@ -24,7 +24,7 @@ export function BottomNav({ activeTab, onTabChange, savedCount, onOpenFavorites 
 
   const handleClick = (tab: TabType) => {
     if (tab === 'saved') {
-      onOpenFavorites()
+      router.push('/saved')
       return
     }
     if (tab === 'profile') {
@@ -32,7 +32,7 @@ export function BottomNav({ activeTab, onTabChange, savedCount, onOpenFavorites 
       return
     }
     if (tab === 'inbox') {
-      // Future: inbox page
+      router.push('/inbox')
       return
     }
     onTabChange(tab)
