@@ -1,7 +1,8 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
+import ServiceWorkerRegistration from "@/components/service-worker-registration";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -13,17 +14,47 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  themeColor: "#006633",
+};
+
 export const metadata: Metadata = {
   title: "Housemate ZM - Rent Anything in Zambia",
-  description: "Premium marketplace for renting rooms, farms, offices, storage, event spaces, garages, warehouses, land, shops, and parking in Zambia. Browse listings across Lusaka, Kitwe, Ndola, Livingstone, and more.",
-  keywords: ["Zambia", "rent", "marketplace", "rooms", "farms", "offices", "Lusaka", "property", "Housemate ZM"],
+  description:
+    "Premium marketplace for renting rooms, farms, offices, storage, event spaces, garages, warehouses, land, shops, and parking in Zambia. Browse listings across Lusaka, Kitwe, Ndola, Livingstone, and more.",
+  keywords: [
+    "Zambia",
+    "rent",
+    "marketplace",
+    "rooms",
+    "farms",
+    "offices",
+    "Lusaka",
+    "property",
+    "Housemate ZM",
+  ],
   authors: [{ name: "Housemate ZM" }],
   icons: {
-    icon: "https://z-cdn.chatglm.cn/z-ai/static/logo.svg",
+    icon: [
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: "/apple-touch-icon.png",
+  },
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Housemate ZM",
   },
   openGraph: {
     title: "Housemate ZM - Rent Anything in Zambia",
-    description: "Premium marketplace for renting anything in Zambia. Rooms, farms, offices, event spaces and more.",
+    description:
+      "Premium marketplace for renting anything in Zambia. Rooms, farms, offices, event spaces and more.",
     siteName: "Housemate ZM",
     type: "website",
   },
@@ -41,10 +72,18 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground`}
       >
         {children}
+        <ServiceWorkerRegistration />
         <Toaster />
       </body>
     </html>
