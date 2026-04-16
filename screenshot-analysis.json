@@ -1,0 +1,28 @@
+{
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "index": 0,
+      "message": {
+        "content": "08:21:05.678  Failed to compile.\n08:21:05.679  ./src/components/ui/toaster.tsx:3:26\n08:21:05.679  Type error: Cannot find module '@hooks/use-toast' or its corresponding type declarations.\n08:21:05.679  1 | \"use client\"\n08:21:05.679  2 | \n08:21:05.679  > 3 | import { useToast } from \"@hooks/use-toast\"\n08:21:05.680  4 | import {\n08:21:05.680  5 |   Toast,\n08:21:05.680  6 |   ToastClose,\n08:21:05.714  Next.js build worker exited with code: 1 and signal: null\n08:21:05.754  Error: Command \"npm run build\" exited with 1",
+        "role": "assistant"
+      }
+    }
+  ],
+  "created": 1776320817,
+  "id": "202604161426473f98eae0abb04cf3",
+  "model": "glm-4.6v",
+  "object": "chat.completion",
+  "request_id": "202604161426473f98eae0abb04cf3",
+  "usage": {
+    "completion_tokens": 207,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens": 1602,
+    "prompt_tokens_details": {
+      "cached_tokens": 4
+    },
+    "total_tokens": 1809
+  }
+}
