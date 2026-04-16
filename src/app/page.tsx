@@ -1,424 +1,313 @@
-'use client'
+'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react'
-import { Header } from '@/components/marketplace/header'
-import { CategoryRow, type Category } from '@/components/marketplace/category-row'
-import { ListingGrid } from '@/components/marketplace/listing-grid'
-import { ListingDetail } from '@/components/marketplace/listing-detail'
-import { FavoritesSheet } from '@/components/marketplace/favorites-sheet'
-import { BottomNav, type TabType } from '@/components/marketplace/bottom-nav'
-import { ChevronRight } from 'lucide-react'
-import Link from 'next/link'
-import type { Listing } from '@/components/marketplace/listing-card'
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { motion } from 'framer-motion';
+import { MapPin, Search, Star, ChevronRight, ArrowRight, Loader2, Shield } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 
-function getSessionId(): string {
-  if (typeof window === 'undefined') return ''
-  let sessionId = localStorage.getItem('hmz-session')
-  if (!sessionId) {
-    sessionId = crypto.randomUUID()
-    localStorage.setItem('hmz-session', sessionId)
-  }
-  return sessionId
+interface Lodge {
+  id: string;
+  name: string;
+  location: string;
+  price: number;
+  priceUnit: string;
+  rating: number;
+  gradient: string;
+  availability: string;
+  distance: number | null;
 }
 
-// Section configuration matching the screenshot
-const sections = [
-  { key: 'all', title: 'All Collection', description: 'Browse all available listings', link: '/explore' },
-  { key: 'budget', title: 'Budget Friendly', description: 'Affordable options under K3,000', link: '/explore?maxPrice=3000' },
-  { key: 'executive', title: 'Executive Living', description: 'Premium properties for discerning tenants', link: '/explore?minPrice=5000' },
-  { key: 'top', title: 'Top Rated', description: 'Highest rated properties by users', link: '/explore?sort=top' },
-]
+const AMENITY_ICONS: Record<string, string> = {
+  WiFi: '📶',
+  Parking: '🅿️',
+  Pool: '🏊',
+  Restaurant: '🍽️',
+  AC: '❄️',
+  Bar: '🍸',
+};
 
-function getListingsForSection(sectionKey: string, listings: Listing[]): Listing[] {
-  switch (sectionKey) {
-    case 'budget':
-      return listings.filter(l => l.price < 3000).slice(0, 6)
-    case 'executive':
-      return listings
-        .filter(l => l.tier === 'premium' || l.tier === 'featured' || l.price >= 5000)
-        .slice(0, 6)
-    case 'top': {
-      // Sort by a pseudo-rating derived from tier + creation date
-      return [...listings]
-        .sort((a, b) => {
-          const tierOrder: Record<string, number> = { premium: 4, featured: 3, spotlight: 2, standard: 1 }
-          const scoreA = (tierOrder[a.tier] || 1) + (new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()) / 100000000000
-          const scoreB = (tierOrder[b.tier] || 1) + (new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()) / 100000000000
-          return scoreB - scoreA
-        })
-        .slice(0, 6)
-    }
-    default:
-      return listings.slice(0, 6)
-  }
-}
+export default function HomePage() {
+  const [featuredLodges, setFeaturedLodges] = useState<Lodge[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [detectingLocation, setDetectingLocation] = useState(false);
 
-export default function Home() {
-  // Data states
-  const [listings, setListings] = useState<Listing[]>([])
-  const [categories, setCategories] = useState<Category[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-
-  // UI states
-  const [searchQuery, setSearchQuery] = useState('')
-  const [activeCategory, setActiveCategory] = useState('All')
-  const [activeTab, setActiveTab] = useState<TabType>('explore')
-  const [activeView, setActiveView] = useState<'list' | 'map'>('list')
-  const [selectedListing, setSelectedListing] = useState<Listing | null>(null)
-  const [detailOpen, setDetailOpen] = useState(false)
-  const [favoritesOpen, setFavoritesOpen] = useState(false)
-  const [favoriteIds, setFavoriteIds] = useState<Set<string>>(new Set())
-  const [favoriteListings, setFavoriteListings] = useState<Listing[]>([])
-
-  const sessionId = getSessionId()
-
-  // Fetch initial data
   useEffect(() => {
-    async function fetchData() {
-      setIsLoading(true)
-      try {
-        const [listingsRes, categoriesRes] = await Promise.all([
-          fetch('/api/listings'),
-          fetch('/api/categories'),
-        ])
+    fetchFeaturedLodges();
+  }, [userLocation]);
 
-        const listingsData = await listingsRes.json()
-        const categoriesData = await categoriesRes.json()
-
-        setListings(listingsData)
-        setCategories(categoriesData)
-      } catch (error) {
-        console.error('Failed to fetch data:', error)
-      } finally {
-        setIsLoading(false)
+  const fetchFeaturedLodges = async () => {
+    try {
+      const params = new URLSearchParams();
+      params.set('sort', 'rating');
+      if (userLocation) {
+        params.set('lat', userLocation.lat.toString());
+        params.set('lng', userLocation.lng.toString());
       }
+      const res = await fetch(`/api/lodges?${params.toString()}`);
+      const data = await res.json();
+      setFeaturedLodges(data.lodges.slice(0, 3));
+    } catch {
+      // Silent fail
+    } finally {
+      setLoading(false);
     }
+  };
 
-    fetchData()
-  }, [])
-
-  // Auth state
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-
-  // Check auth on mount
-  useEffect(() => {
-    async function checkAuth() {
-      try {
-        const res = await fetch('/api/auth/session')
-        const data = await res.json()
-        setIsAuthenticated(!!data.user)
-      } catch {
-        // Not authenticated
-      }
+  const detectLocation = () => {
+    setDetectingLocation(true);
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          });
+          setDetectingLocation(false);
+        },
+        () => {
+          setDetectingLocation(false);
+        },
+        { timeout: 10000 }
+      );
+    } else {
+      setDetectingLocation(false);
     }
-    checkAuth()
-  }, [])
+  };
 
-  // Fetch favorites on mount and when auth changes
-  useEffect(() => {
-    async function fetchFavorites() {
-      try {
-        // Auth cookie is sent automatically; fallback to sessionId for anonymous
-        const urlParam = isAuthenticated ? '' : `?sessionId=${sessionId}`
-        const res = await fetch(`/api/favorites${urlParam}`)
-        const data = await res.json()
-        setFavoriteListings(data)
-        setFavoriteIds(new Set(data.map((f: Listing) => f.id)))
-      } catch {
-        console.error('Failed to fetch favorites')
-      }
+  const getAvailabilityBadge = (availability: string) => {
+    switch (availability) {
+      case 'LIKELY_AVAILABLE':
+        return { label: 'Available', color: 'bg-green-100 text-green-700' };
+      case 'CHECK':
+        return { label: 'Check', color: 'bg-blue-100 text-blue-700' };
+      case 'LIKELY_FULL':
+        return { label: 'Full', color: 'bg-red-100 text-red-700' };
+      default:
+        return { label: 'Check', color: 'bg-blue-100 text-blue-700' };
     }
+  };
 
-    fetchFavorites()
-  }, [sessionId, isAuthenticated])
-
-  // Filter listings based on search and category
-  const filteredListings = useMemo(() => {
-    let filtered = listings
-
-    if (activeCategory !== 'All') {
-      filtered = filtered.filter((l) => l.category === activeCategory)
-    }
-
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase()
-      filtered = filtered.filter(
-        (l) =>
-          l.title.toLowerCase().includes(q) ||
-          l.description.toLowerCase().includes(q) ||
-          l.location.toLowerCase().includes(q)
-      )
-    }
-
-    return filtered
-  }, [listings, activeCategory, searchQuery])
-
-  // Toggle favorite (works for both auth and anonymous)
-  const toggleFavorite = useCallback(
-    async (listing: Listing) => {
-      const isFav = favoriteIds.has(listing.id)
-
-      try {
-        if (isFav) {
-          const urlParam = isAuthenticated
-            ? `?listingId=${listing.id}`
-            : `?listingId=${listing.id}&sessionId=${sessionId}`
-          await fetch(`/api/favorites${urlParam}`, { method: 'DELETE' })
-          setFavoriteIds((prev) => {
-            const next = new Set(prev)
-            next.delete(listing.id)
-            return next
-          })
-          setFavoriteListings((prev) => prev.filter((f) => f.id !== listing.id))
-        } else {
-          await fetch('/api/favorites', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ listingId: listing.id, sessionId: isAuthenticated ? undefined : sessionId }),
-          })
-          setFavoriteIds((prev) => new Set(prev).add(listing.id))
-          setFavoriteListings((prev) => [listing, ...prev])
-        }
-      } catch {
-        console.error('Failed to toggle favorite')
-      }
-    },
-    [sessionId, isAuthenticated, favoriteIds]
-  )
-
-  const removeFavorite = useCallback(
-    async (listingId: string) => {
-      try {
-        const urlParam = isAuthenticated
-          ? `?listingId=${listingId}`
-          : `?listingId=${listingId}&sessionId=${sessionId}`
-        await fetch(`/api/favorites${urlParam}`, { method: 'DELETE' })
-        setFavoriteIds((prev) => {
-          const next = new Set(prev)
-          next.delete(listingId)
-          return next
-        })
-        setFavoriteListings((prev) => prev.filter((f) => f.id !== listingId))
-      } catch {
-        console.error('Failed to remove favorite')
-      }
-    },
-    [sessionId, isAuthenticated]
-  )
-
-  const handleSelectListing = useCallback((listing: Listing) => {
-    setSelectedListing(listing)
-    setDetailOpen(true)
-  }, [])
-
-  const isFiltered = searchQuery.trim() || activeCategory !== 'All'
+  const renderStars = (rating: number) => {
+    return Array.from({ length: 5 }, (_, i) => (
+      <Star
+        key={i}
+        className={`w-3.5 h-3.5 ${
+          i < Math.round(rating)
+            ? 'fill-amber-400 text-amber-400'
+            : 'fill-gray-200 text-gray-200'
+        }`}
+      />
+    ));
+  };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#f8f9fa]">
-      {/* Green Header */}
-      <Header
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        activeView={activeView}
-        onViewChange={setActiveView}
-        onOpenProfile={() => setActiveTab('profile')}
-      />
+    <div className="min-h-screen bg-white">
+      {/* Hero Section */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-amber-500 via-orange-500 to-amber-600 text-white">
+        {/* Decorative circles */}
+        <div className="absolute top-[-40px] right-[-40px] w-64 h-64 rounded-full bg-white/10" />
+        <div className="absolute bottom-[-60px] left-[-30px] w-80 h-80 rounded-full bg-white/5" />
+        <div className="absolute top-1/2 right-1/4 w-32 h-32 rounded-full bg-white/10" />
 
-      {/* Main Content */}
-      <main className="flex-1 pb-20">
-        {/* Category icons row */}
-        <CategoryRow
-          categories={categories}
-          activeCategory={activeCategory}
-          onCategoryChange={setActiveCategory}
-        />
+        <div className="relative max-w-lg mx-auto px-4 pt-16 pb-20">
+          {/* Logo */}
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="flex items-center gap-2 mb-8"
+          >
+            <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+              <MapPin className="w-6 h-6 text-white" />
+            </div>
+            <span className="text-xl font-bold tracking-tight">StayNow</span>
+          </motion.div>
 
-        {/* When filtered, show simple grid */}
-        {isFiltered ? (
-          <div className="mt-2">
-            <ListingGrid
-              listings={filteredListings}
-              favorites={favoriteIds}
-              onToggleFavorite={toggleFavorite}
-              onSelectListing={handleSelectListing}
-              isLoading={isLoading}
-            />
+          {/* Tagline */}
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="text-4xl font-bold leading-tight mb-4"
+          >
+            Find a place to stay,{' '}
+            <span className="text-amber-100">right now</span>
+          </motion.h1>
+
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="text-white/80 text-lg mb-8 leading-relaxed"
+          >
+            Browse nearby lodges across Zambia. Request a reservation and get confirmed in minutes.
+          </motion.p>
+
+          {/* CTA Buttons */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            className="flex flex-col gap-3"
+          >
+            <Link href="/lodges">
+              <Button
+                size="lg"
+                className="w-full bg-white text-amber-600 hover:bg-amber-50 rounded-xl h-14 text-base font-semibold shadow-lg shadow-black/10 transition-all hover:shadow-xl"
+              >
+                <Search className="w-5 h-5 mr-2" />
+                Find a Place to Stay
+              </Button>
+            </Link>
+
+            <Button
+              variant="ghost"
+              size="lg"
+              onClick={detectLocation}
+              disabled={detectingLocation}
+              className="w-full text-white/90 hover:text-white hover:bg-white/10 rounded-xl h-12"
+            >
+              {detectingLocation ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <MapPin className="w-4 h-4 mr-2" />
+              )}
+              {detectingLocation
+                ? 'Detecting location...'
+                : userLocation
+                ? '📍 Location detected'
+                : 'Use my location'}
+            </Button>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* How it works */}
+      <section className="max-w-lg mx-auto px-4 py-10">
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+        >
+          <h2 className="text-xl font-bold text-slate-900 mb-6">How it works</h2>
+          <div className="grid grid-cols-3 gap-3">
+            {[
+              { icon: '🔍', label: 'Find', desc: 'Browse lodges' },
+              { icon: '📱', label: 'Request', desc: 'Book instantly' },
+              { icon: '✅', label: 'Confirm', desc: 'Get approved' },
+            ].map((step, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: i * 0.1 }}
+                className="text-center p-3"
+              >
+                <div className="text-3xl mb-2">{step.icon}</div>
+                <div className="font-semibold text-sm text-slate-900">{step.label}</div>
+                <div className="text-xs text-slate-500 mt-1">{step.desc}</div>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
+      </section>
+
+      {/* Featured Lodges */}
+      <section className="max-w-lg mx-auto px-4 pb-10">
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="text-xl font-bold text-slate-900">Featured Lodges</h2>
+          <Link href="/lodges" className="text-amber-600 text-sm font-medium flex items-center gap-1 hover:gap-2 transition-all">
+            View all <ChevronRight className="w-4 h-4" />
+          </Link>
+        </div>
+
+        {loading ? (
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="animate-shimmer rounded-2xl h-40" />
+            ))}
           </div>
         ) : (
-          /* Category sections like the screenshot */
-          <>
-            {sections.map((section, idx) => {
-              const sectionListings = getListingsForSection(section.key, listings)
-
-              if (isLoading) {
-                return (
-                  <section key={section.key} className="mt-4">
-                    <div className="px-4 mb-3 flex items-center justify-between">
-                      <div>
-                        <h2 className="text-sm font-bold text-gray-900">{section.title}</h2>
-                        <p className="text-[11px] text-gray-400 mt-0.5">{section.description}</p>
-                      </div>
-                      <Link href={section.link} className="flex items-center gap-0.5 text-[#006633] text-xs font-semibold hover:text-[#004d26] transition-colors">
-                        See all
-                        <ChevronRight className="size-3.5" />
-                      </Link>
-                    </div>
-                    <ListingGrid
-                      listings={Array(6).fill({}) as unknown as Listing[]}
-                      favorites={favoriteIds}
-                      onToggleFavorite={toggleFavorite}
-                      onSelectListing={handleSelectListing}
-                      isLoading={true}
-                    />
-                  </section>
-                )
-              }
-
-              if (sectionListings.length === 0) return null
-
+          <div className="space-y-4">
+            {featuredLodges.map((lodge, i) => {
+              const badge = getAvailabilityBadge(lodge.availability);
               return (
-                <section key={section.key} className="mt-4">
-                  {/* Section header */}
-                  <div className="px-4 mb-3 flex items-center justify-between">
-                    <div>
-                      <h2 className="text-sm font-bold text-gray-900">{section.title}</h2>
-                      <p className="text-[11px] text-gray-400 mt-0.5">{section.description}</p>
-                    </div>
-                    <Link href={section.link} className="flex items-center gap-0.5 text-[#006633] text-xs font-semibold hover:text-[#004d26] transition-colors">
-                      See all
-                      <ChevronRight className="size-3.5" />
-                    </Link>
-                  </div>
-
-                  {/* Section listings */}
-                  {idx === 0 ? (
-                    /* First section (All Collection) - horizontal scroll cards */
-                    <div className="flex gap-3 overflow-x-auto px-4 pb-2 scrollbar-none">
-                      {sectionListings.map((listing) => (
-                        <HorizontalCard
-                          key={listing.id}
-                          listing={listing}
-                          isFavorited={favoriteIds.has(listing.id)}
-                          onToggleFavorite={toggleFavorite}
-                          onSelectListing={handleSelectListing}
-                        />
-                      ))}
-                    </div>
-                  ) : (
-                    /* Other sections - grid */
-                    <ListingGrid
-                      listings={sectionListings}
-                      favorites={favoriteIds}
-                      onToggleFavorite={toggleFavorite}
-                      onSelectListing={handleSelectListing}
-                      isLoading={false}
-                    />
-                  )}
-                </section>
-              )
+                <motion.div
+                  key={lodge.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: i * 0.1 }}
+                >
+                  <Link href={`/lodges/${lodge.id}`}>
+                    <Card className="overflow-hidden border-0 shadow-md hover:shadow-lg transition-all duration-300 rounded-2xl">
+                      <div className="flex">
+                        {/* Image placeholder */}
+                        <div className={`w-32 h-32 sm:w-40 sm:h-40 bg-gradient-to-br ${lodge.gradient} flex-shrink-0 flex items-center justify-center relative`}>
+                          <MapPin className="w-8 h-8 text-white/60" />
+                          <span className={`absolute top-2 left-2 text-[10px] font-semibold px-2 py-0.5 rounded-full ${badge.color}`}>
+                            {badge.label}
+                          </span>
+                        </div>
+                        {/* Content */}
+                        <CardContent className="p-4 flex-1 min-w-0">
+                          <h3 className="font-semibold text-slate-900 text-sm sm:text-base truncate">
+                            {lodge.name}
+                          </h3>
+                          <div className="flex items-center gap-1 mt-1">
+                            <MapPin className="w-3 h-3 text-slate-400" />
+                            <span className="text-xs text-slate-500 truncate">{lodge.location}</span>
+                            {lodge.distance && (
+                              <span className="text-[10px] text-slate-400 ml-1">
+                                {lodge.distance.toFixed(0)} km
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-1 mt-2">
+                            {renderStars(lodge.rating)}
+                            <span className="text-xs text-slate-400 ml-1">{lodge.rating}</span>
+                          </div>
+                          <div className="flex items-center justify-between mt-3">
+                            <div>
+                              <span className="font-bold text-amber-600">K{lodge.price.toLocaleString()}</span>
+                              <span className="text-xs text-slate-400">/{lodge.priceUnit}</span>
+                            </div>
+                            <ArrowRight className="w-4 h-4 text-slate-300" />
+                          </div>
+                        </CardContent>
+                      </div>
+                    </Card>
+                  </Link>
+                </motion.div>
+              );
             })}
-          </>
+          </div>
         )}
-      </main>
+      </section>
 
-      {/* Bottom Navigation */}
-      <BottomNav
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-        savedCount={favoriteIds.size}
-        onOpenFavorites={() => setFavoritesOpen(true)}
-      />
-
-      {/* Listing Detail Modal */}
-      <ListingDetail
-        listing={selectedListing}
-        open={detailOpen}
-        isFavorited={selectedListing ? favoriteIds.has(selectedListing.id) : false}
-        onOpenChange={setDetailOpen}
-        onToggleFavorite={() => {
-          if (selectedListing) toggleFavorite(selectedListing)
-        }}
-      />
-
-      {/* Favorites Sheet */}
-      <FavoritesSheet
-        open={favoritesOpen}
-        onOpenChange={setFavoritesOpen}
-        favorites={favoriteListings}
-        onRemoveFavorite={removeFavorite}
-        onSelectListing={handleSelectListing}
-      />
-    </div>
-  )
-}
-
-// Horizontal scrollable card for "All Collection" section
-function HorizontalCard({
-  listing,
-  isFavorited,
-  onToggleFavorite,
-  onSelectListing,
-}: {
-  listing: Listing
-  isFavorited: boolean
-  onToggleFavorite: (listing: Listing) => void
-  onSelectListing: (listing: Listing) => void
-}) {
-  const hash = listing.id.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0)
-  const rating = (3.5 + (hash % 15) / 10).toFixed(1)
-
-  return (
-    <div
-      className="group relative bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer border border-gray-100 shrink-0 w-44"
-      onClick={() => onSelectListing(listing)}
-    >
-      {/* Image */}
-      <div className="relative aspect-[3/2] overflow-hidden bg-gray-100">
-        <img
-          src={listing.imageUrl}
-          alt={listing.title}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-          loading="lazy"
-        />
-        {listing.tier !== 'standard' && (
-          <span className="absolute top-1.5 left-1.5 inline-flex items-center gap-0.5 bg-[#006633] text-white text-[9px] font-semibold px-1.5 py-0.5 rounded">
-            Verified
-          </span>
-        )}
-        <button
-          onClick={(e) => {
-            e.stopPropagation()
-            onToggleFavorite(listing)
-          }}
-          className="absolute top-1.5 right-1.5 h-6 w-6 rounded-full bg-white/90 flex items-center justify-center"
-        >
-          <svg
-            className={`size-3 ${isFavorited ? 'fill-red-500 text-red-500' : 'text-gray-400'}`}
-            viewBox="0 0 24 24"
-            fill={isFavorited ? 'currentColor' : 'none'}
-            stroke="currentColor"
-            strokeWidth={2}
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
-          </svg>
-        </button>
-      </div>
-      {/* Content */}
-      <div className="p-2.5 space-y-1">
-        <h3 className="text-[12px] font-semibold text-gray-900 line-clamp-1 leading-snug">
-          {listing.title}
-        </h3>
-        <div className="flex items-center gap-1">
-          <svg className="size-3 fill-amber-400 text-amber-400" viewBox="0 0 24 24">
-            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-          </svg>
-          <span className="text-[10px] font-semibold text-gray-600">{rating}</span>
-          <span className="text-[10px] text-gray-400">· {listing.category}</span>
+      {/* Admin Link */}
+      <section className="max-w-lg mx-auto px-4 pb-10">
+        <div className="border border-slate-200 rounded-2xl p-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center">
+              <Shield className="w-4 h-4 text-slate-500" />
+            </div>
+            <div>
+              <div className="text-sm font-medium text-slate-700">Admin Dashboard</div>
+              <div className="text-xs text-slate-400">Manage reservations</div>
+            </div>
+          </div>
+          <Link href="/admin">
+            <Button variant="ghost" size="sm" className="text-slate-500 hover:text-slate-700">
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          </Link>
         </div>
-        <p className="text-[11px] font-bold text-gray-900">
-          K{listing.price.toLocaleString()} <span className="font-normal text-gray-400">/ {listing.priceUnit}</span>
-        </p>
-      </div>
+      </section>
     </div>
-  )
+  );
 }

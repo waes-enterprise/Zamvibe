@@ -1,355 +1,271 @@
-import { PrismaClient } from '@prisma/client'
-import { hashPassword } from '../src/lib/auth'
+import { PrismaClient } from '@prisma/client';
 
-const db = new PrismaClient()
+const db = new PrismaClient();
 
-const listings = [
-  // Premium listings (3)
-  {
-    title: "Luxury 3-Bedroom Apartment in Makeni",
-    description: "Stunning modern apartment with panoramic views of Lusaka city. Fully furnished with air conditioning, high-speed WiFi, swimming pool access, and 24/7 security. Located in the prestigious Makeni neighborhood, close to Arcades Shopping Mall and major embassies.",
-    price: 3500,
-    priceUnit: "month",
-    location: "Makeni, Lusaka",
-    category: "Rooms",
-    imageUrl: "https://picsum.photos/seed/luxury-makeni/600/400",
-    tier: "premium",
-    contactPhone: "+260977123456",
-    contactEmail: "makeni.rentals@email.com",
-    isFeatured: true,
-  },
-  {
-    title: "500-Hectare Commercial Farm in Chisamba",
-    description: "Prime agricultural land with fully operational irrigation system, farm buildings, and worker quarters. Ideal for maize, wheat, or soybean production. Includes tractors and farming equipment. Fertile loam soil with reliable water supply from the Kafue River tributary.",
-    price: 45000,
-    priceUnit: "month",
-    location: "Chisamba, Central Province",
-    category: "Farms",
-    imageUrl: "https://picsum.photos/seed/chisamba-farm/600/400",
-    tier: "premium",
-    contactPhone: "+260966789012",
-    contactEmail: "chisamba.farms@email.com",
-    isFeatured: true,
-  },
-  {
-    title: "Modern Office Space - Cairo Road",
-    description: "Premium Grade A office space in the heart of Lusaka's business district. Open-plan layout with partitioned meeting rooms, fiber optic internet, backup generator, and dedicated parking for 10 vehicles. Perfect for corporate headquarters or co-working space.",
-    price: 12000,
-    priceUnit: "month",
-    location: "Cairo Road, Lusaka",
-    category: "Offices",
-    imageUrl: "https://picsum.photos/seed/cairo-office/600/400",
-    tier: "premium",
-    contactPhone: "+260955345678",
-    contactEmail: "cairo.offices@email.com",
-    isFeatured: true,
-  },
+const AMENITIES = {
+  wifi: 'WiFi',
+  parking: 'Parking',
+  pool: 'Pool',
+  restaurant: 'Restaurant',
+  ac: 'AC',
+  bar: 'Bar',
+};
 
-  // Featured listings (5)
+const lodgeData = [
   {
-    title: "Cozy Studio Near University of Zambia",
-    description: "Well-maintained studio apartment, 5-minute walk to UNZA main campus. Includes bed, desk, wardrobe, and small kitchenette. Shared bathroom. Perfect for students or young professionals. Electricity and water included in rent.",
-    price: 800,
-    priceUnit: "month",
-    location: "Great East Road, Lusaka",
-    category: "Rooms",
-    imageUrl: "https://picsum.photos/seed/unza-studio/600/400",
-    tier: "featured",
-    contactPhone: "+260977234567",
-    isFeatured: true,
-  },
-  {
-    title: "Industrial Storage Facility - Ndola",
-    description: "Secure warehouse storage facility with 24/7 CCTV surveillance, fire suppression system, and loading dock. Ideal for inventory storage, equipment, or commercial goods. Forklift available on site. Flexible lease terms available.",
-    price: 2500,
-    priceUnit: "month",
-    location: "Industrial Area, Ndola",
-    category: "Storage",
-    imageUrl: "https://picsum.photos/seed/ndola-storage/600/400",
-    tier: "featured",
-    contactPhone: "+260966456789",
-    contactEmail: "ndola.storage@email.com",
-    isFeatured: true,
-  },
-  {
-    title: "Elegant Event Venue - The Boma",
-    description: "Beautiful outdoor and indoor event space suitable for weddings, corporate events, and parties. Accommodates up to 500 guests. Includes stage, sound system, lighting, and catering kitchen. Ample parking space available.",
-    price: 8500,
-    priceUnit: "event",
-    location: "Kabulonga, Lusaka",
-    category: "Event Spaces",
-    imageUrl: "https://picsum.photos/seed/boma-events/600/400",
-    tier: "featured",
-    contactPhone: "+260955567890",
-    contactEmail: "theboma.events@email.com",
-    isFeatured: true,
-  },
-  {
-    title: "Secure Underground Parking - CBD Kitwe",
-    description: "Covered underground parking spot in the central business district of Kitwe. 24/7 security, well-lit, and easily accessible. Monthly or daily rates available. Ideal for professionals working in the CBD area.",
-    price: 15,
-    priceUnit: "day",
-    location: "CBD, Kitwe",
-    category: "Parking",
-    imageUrl: "https://picsum.photos/seed/kitwe-parking/600/400",
-    tier: "featured",
-    contactPhone: "+260977678901",
-    isFeatured: true,
-  },
-  {
-    title: "2-Bedroom Flat in Kabwe Town Center",
-    description: "Spacious 2-bedroom flat in the heart of Kabwe. Recently renovated with new tiles, paint, and fixtures. Close to shops, schools, and public transport. Secure compound with burglar bars and gate.",
-    price: 1800,
-    priceUnit: "month",
-    location: "Town Center, Kabwe",
-    category: "Rooms",
-    imageUrl: "https://picsum.photos/seed/kabwe-flat/600/400",
-    tier: "featured",
-    contactPhone: "+260966789012",
-  },
-
-  // Spotlight listings (4)
-  {
-    title: "Mechanic Garage with Equipment - Livingstone",
-    description: "Well-equipped mechanic garage near Livingstone town center. Includes hydraulic lift, tire machine, compressor, and various tools. Ideal for auto repair business. High foot traffic area near the main road to Victoria Falls.",
-    price: 3000,
-    priceUnit: "month",
-    location: "Industrial Area, Livingstone",
-    category: "Garages",
-    imageUrl: "https://picsum.photos/seed/livingstone-garage/600/400",
-    tier: "spotlight",
-    contactPhone: "+260955890123",
-  },
-  {
-    title: "Retail Shop Space - Levy Mall Area",
-    description: "Prime retail space available in high-traffic area near Levy Junction Mall. 80 square meters, ideal for clothing store, electronics shop, or restaurant. Large glass storefront, air conditioning, and ample customer parking.",
-    price: 5000,
-    priceUnit: "month",
-    location: "Levy Junction, Lusaka",
-    category: "Shops",
-    imageUrl: "https://picsum.photos/seed/levy-shop/600/400",
-    tier: "spotlight",
-    contactPhone: "+260977901234",
-    contactEmail: "levy.retail@email.com",
-  },
-  {
-    title: "2000 sqm Warehouse - Fairview",
-    description: "Large warehouse space in Fairview industrial area. High ceiling, reinforced concrete floor, roller shutter doors, and 3-phase power connection. Suitable for manufacturing, distribution, or logistics operations.",
-    price: 8000,
-    priceUnit: "month",
-    location: "Fairview, Lusaka",
-    category: "Warehouses",
-    imageUrl: "https://picsum.photos/seed/fairview-warehouse/600/400",
-    tier: "spotlight",
-    contactPhone: "+260966012345",
-    contactEmail: "fairview.wh@email.com",
-  },
-  {
-    title: "Agricultural Land with Borehole - Chipata",
-    description: "100-hectare plot with fully functional borehole and irrigation infrastructure. Fertile soil suitable for crop farming or livestock. Includes a 3-bedroom farmhouse and staff quarters. Title deeds available.",
-    price: 15000,
-    priceUnit: "month",
-    location: "Chipata, Eastern Province",
-    category: "Land",
-    imageUrl: "https://picsum.photos/seed/chipata-land/600/400",
-    tier: "spotlight",
-    contactPhone: "+260955123456",
-  },
-
-  // Standard listings (10)
-  {
-    title: "Single Room - Rhodes Park",
-    description: "Clean and tidy single room in a shared house. Access to shared kitchen and bathroom. Quiet neighborhood with good security. Perfect for a single professional. Water and electricity included.",
-    price: 500,
-    priceUnit: "month",
-    location: "Rhodes Park, Lusaka",
-    category: "Rooms",
-    imageUrl: "https://picsum.photos/seed/rhodespark-room/600/400",
-    tier: "standard",
-    contactPhone: "+260977234567",
-  },
-  {
-    title: "Poultry Farm - Chongwe",
-    description: "Established poultry farm with capacity for 5,000 broilers. Includes 4 poultry houses, feed storage, and water system. Good road access. Current owner available for training and handover period.",
-    price: 5000,
-    priceUnit: "month",
-    location: "Chongwe, Lusaka Province",
-    category: "Farms",
-    imageUrl: "https://picsum.photos/seed/chongwe-poultry/600/400",
-    tier: "standard",
-    contactPhone: "+260966345678",
-  },
-  {
-    title: "Shared Office Desk - Bwinjifuma",
-    description: "Hot desk in a modern co-working space. Includes high-speed WiFi, printing access, meeting room booking (4 hours/month), and free coffee/tea. Community events and networking opportunities. Flexible monthly plan.",
+    name: 'Riverside Lodge Lusaka',
+    description: 'A beautiful lodge along the banks of the Zambezi River with stunning views and modern amenities. Perfect for business travelers and tourists alike. Our lodge offers comfortable rooms, a swimming pool, and an on-site restaurant serving both local and international cuisine.',
+    location: 'Lusaka',
+    address: '42 Cairo Road, Lusaka, Zambia',
+    phone: '+260 211 251 123',
     price: 450,
-    priceUnit: "month",
-    location: "Bwinjifuma, Lusaka",
-    category: "Offices",
-    imageUrl: "https://picsum.photos/seed/bwinjifuma-cowork/600/400",
-    tier: "standard",
-    contactEmail: "bwinjifuma.cowork@email.com",
+    priceUnit: 'night',
+    latitude: -15.3875,
+    longitude: 28.3228,
+    amenities: JSON.stringify(['WiFi', 'Parking', 'Pool', 'Restaurant', 'AC']),
+    rating: 4.5,
+    totalRooms: 24,
+    gradient: 'from-amber-400 to-orange-500',
   },
   {
-    title: "Self-Storage Unit - Northmead",
-    description: "Secure self-storage unit, 3x3 meters. Ideal for furniture, boxes, or business inventory. Clean, dry, and pest-free. 24/7 access with your own key. Monthly billing with no long-term commitment.",
-    price: 300,
-    priceUnit: "month",
-    location: "Northmead, Lusaka",
-    category: "Storage",
-    imageUrl: "https://picsum.photos/seed/northmead-storage/600/400",
-    tier: "standard",
-    contactPhone: "+260955456789",
+    name: 'Victoria Falls Retreat',
+    description: 'Located just minutes from the magnificent Victoria Falls, our retreat offers an unforgettable experience. Enjoy the sound of the falls from your private balcony, take guided tours, or relax by our infinity pool. Breakfast included with every stay.',
+    location: 'Livingstone',
+    address: '18 Mosi-oa-Tunya Road, Livingstone, Zambia',
+    phone: '+260 213 320 456',
+    price: 780,
+    priceUnit: 'night',
+    latitude: -17.8450,
+    longitude: 25.8583,
+    amenities: JSON.stringify(['WiFi', 'Parking', 'Pool', 'Restaurant', 'AC', 'Bar']),
+    rating: 4.8,
+    totalRooms: 18,
+    gradient: 'from-emerald-400 to-teal-500',
   },
   {
-    title: "Garden Party Venue - Ibex Hill",
-    description: "Beautiful garden setting perfect for bridal showers, birthday parties, and intimate gatherings. Accommodates up to 150 guests. Lush green lawns, braai area, and built-in sound system. Weekend specials available.",
-    price: 2500,
-    priceUnit: "event",
-    location: "Ibex Hill, Lusaka",
-    category: "Event Spaces",
-    imageUrl: "https://picsum.photos/seed/ibex-garden/600/400",
-    tier: "standard",
-    contactPhone: "+260977567890",
+    name: 'Copperbelt Suites',
+    description: 'Modern and affordable suites in the heart of the Copperbelt. Ideal for business travelers visiting mining operations or attending conferences. High-speed WiFi, 24/7 security, and a fully equipped business center available for all guests.',
+    location: 'Kitwe',
+    address: '7 Obote Avenue, Kitwe, Zambia',
+    phone: '+260 212 223 789',
+    price: 320,
+    priceUnit: 'night',
+    latitude: -12.8024,
+    longitude: 28.2135,
+    amenities: JSON.stringify(['WiFi', 'Parking', 'AC']),
+    rating: 4.2,
+    totalRooms: 30,
+    gradient: 'from-sky-400 to-blue-500',
   },
   {
-    title: "Double Garage - Woodlands",
-    description: "Double garage available for rent in Woodlands residential area. Suitable for vehicle storage, workshop, or small business. Electric roller door, good lighting, and drainage. Quiet neighborhood.",
-    price: 800,
-    priceUnit: "month",
-    location: "Woodlands, Lusaka",
-    category: "Garages",
-    imageUrl: "https://picsum.photos/seed/woodlands-garage/600/400",
-    tier: "standard",
+    name: 'Ndola Garden Hotel',
+    description: 'Set amidst lush tropical gardens, this charming hotel offers a peaceful retreat from the bustling city. Our spacious rooms feature traditional Zambian decor with modern comforts. Enjoy our outdoor dining area under the stars.',
+    location: 'Ndola',
+    address: '15 Bwana Mkubwa Road, Ndola, Zambia',
+    phone: '+260 212 617 234',
+    price: 380,
+    priceUnit: 'night',
+    latitude: -12.9583,
+    longitude: 28.6367,
+    amenities: JSON.stringify(['WiFi', 'Parking', 'Restaurant', 'AC']),
+    rating: 4.3,
+    totalRooms: 22,
+    gradient: 'from-rose-400 to-pink-500',
   },
   {
-    title: "Large Warehouse - Kafue Road",
-    description: "Spacious warehouse along Kafue Road, ideal for distribution and logistics. 3000 sqm floor area, high bay lighting, and heavy-duty flooring. Easy access to Great North Road. Loading bay for trucks.",
-    price: 15000,
-    priceUnit: "month",
-    location: "Kafue Road, Lusaka",
-    category: "Warehouses",
-    imageUrl: "https://picsum.photos/seed/kafue-warehouse/600/400",
-    tier: "standard",
-    contactPhone: "+260966678901",
-    contactEmail: "kafue.wh@email.com",
+    name: 'Lake Kariba Inn',
+    description: 'Wake up to breathtaking views of Lake Kariba. Our lakeside inn offers fishing trips, boat cruises, and spectacular sunsets. The perfect getaway for nature lovers and those seeking tranquility. Fresh fish from the lake served daily.',
+    location: 'Siavonga',
+    address: '3 Lake Drive, Siavonga, Zambia',
+    phone: '+260 216 240 567',
+    price: 520,
+    priceUnit: 'night',
+    latitude: -16.5311,
+    longitude: 28.7044,
+    amenities: JSON.stringify(['WiFi', 'Parking', 'Restaurant', 'Bar']),
+    rating: 4.6,
+    totalRooms: 16,
+    gradient: 'from-cyan-400 to-blue-600',
   },
   {
-    title: "1-Hectare Plot with Title - Riverside",
-    description: "Residential plot with clean title deed in the up-and-coming Riverside area. Flat terrain, serviced with water and electricity nearby. Great investment opportunity. Surveyed and pegged.",
-    price: 2500,
-    priceUnit: "month",
-    location: "Riverside, Livingstone",
-    category: "Land",
-    imageUrl: "https://picsum.photos/seed/riverside-plot/600/400",
-    tier: "standard",
-    contactPhone: "+260955789012",
+    name: 'Chipata Gateway Lodge',
+    description: 'Your gateway to the Eastern Province and South Luangwa National Park. Comfortable rooms, friendly staff, and expert safari guides. We arrange game drives and cultural tours to nearby villages. A truly authentic Zambian experience.',
+    location: 'Chipata',
+    address: '22 Mpezeni Way, Chipata, Zambia',
+    phone: '+260 216 222 890',
+    price: 290,
+    priceUnit: 'night',
+    latitude: -13.6327,
+    longitude: 32.6492,
+    amenities: JSON.stringify(['WiFi', 'Parking', 'Restaurant']),
+    rating: 4.1,
+    totalRooms: 20,
+    gradient: 'from-violet-400 to-purple-500',
   },
   {
-    title: "Shop Space in Market - Kamwala",
-    description: "Compact shop space in the busy Kamwala market area. Ideal for small retail business, salon, or phone shop. High foot traffic from daily market visitors. Secure with metal grilles.",
-    price: 1200,
-    priceUnit: "month",
-    location: "Kamwala, Lusaka",
-    category: "Shops",
-    imageUrl: "https://picsum.photos/seed/kamwala-shop/600/400",
-    tier: "standard",
-    contactPhone: "+260977890123",
+    name: 'Lusaka Premier Lodge',
+    description: 'The premier choice for luxury accommodation in Lusaka. Elegant suites with king-size beds, marble bathrooms, and panoramic city views. Our rooftop bar and restaurant are the perfect places to unwind after a busy day. Airport transfers available.',
+    location: 'Lusaka',
+    address: '88 Great East Road, Lusaka, Zambia',
+    phone: '+260 211 845 321',
+    price: 950,
+    priceUnit: 'night',
+    latitude: -15.4033,
+    longitude: 28.3428,
+    amenities: JSON.stringify(['WiFi', 'Parking', 'Pool', 'Restaurant', 'AC', 'Bar']),
+    rating: 4.9,
+    totalRooms: 12,
+    gradient: 'from-amber-500 to-red-500',
   },
   {
-    title: "Open Air Parking Lot - Manda Hill",
-    description: "Well-maintained open air parking lot near Manda Hill Shopping Centre. Daily and monthly rates available. Security guard on duty during business hours. Suitable for commuter parking or long-term vehicle storage.",
-    price: 10,
-    priceUnit: "day",
-    location: "Manda Hill, Lusaka",
-    category: "Parking",
-    imageUrl: "https://picsum.photos/seed/mandahill-parking/600/400",
-    tier: "standard",
-    contactPhone: "+260966901234",
+    name: 'Mosi Cultural Village Lodge',
+    description: 'Experience authentic Zambian hospitality at our cultural village lodge. Traditional roundavels with modern amenities, live cultural performances, and hands-on craft workshops. A unique stay that connects you with local traditions and community.',
+    location: 'Livingstone',
+    address: '55 Mukuni Road, Livingstone, Zambia',
+    phone: '+260 213 455 678',
+    price: 350,
+    priceUnit: 'night',
+    latitude: -17.8320,
+    longitude: 25.8610,
+    amenities: JSON.stringify(['WiFi', 'Parking', 'Restaurant']),
+    rating: 4.4,
+    totalRooms: 8,
+    gradient: 'from-lime-400 to-green-600',
   },
-]
-
-const categories = [
-  { name: "Rooms", slug: "rooms", icon: "BedDouble", sortOrder: 1 },
-  { name: "Farms", slug: "farms", icon: "Wheat", sortOrder: 2 },
-  { name: "Offices", slug: "offices", icon: "Building2", sortOrder: 3 },
-  { name: "Storage", slug: "storage", icon: "Archive", sortOrder: 4 },
-  { name: "Event Spaces", slug: "event-spaces", icon: "PartyPopper", sortOrder: 5 },
-  { name: "Garages", slug: "garages", icon: "Car", sortOrder: 6 },
-  { name: "Warehouses", slug: "warehouses", icon: "Warehouse", sortOrder: 7 },
-  { name: "Land", slug: "land", icon: "Mountain", sortOrder: 8 },
-  { name: "Shops", slug: "shops", icon: "Store", sortOrder: 9 },
-  { name: "Parking", slug: "parking", icon: "CircleParking", sortOrder: 10 },
-  { name: "Other", slug: "other", icon: "MoreHorizontal", sortOrder: 11 },
-]
+  {
+    name: 'Kitwe Business Park',
+    description: 'A modern business hotel with state-of-the-art conference facilities. Spacious rooms with dedicated work desks, high-speed internet, and 24/7 room service. Perfect for corporate events, meetings, and extended business stays.',
+    location: 'Kitwe',
+    address: '31 Independence Avenue, Kitwe, Zambia',
+    phone: '+260 212 334 901',
+    price: 410,
+    priceUnit: 'night',
+    latitude: -12.7960,
+    longitude: 28.2080,
+    amenities: JSON.stringify(['WiFi', 'Parking', 'Restaurant', 'AC', 'Bar']),
+    rating: 4.3,
+    totalRooms: 36,
+    gradient: 'from-orange-400 to-amber-600',
+  },
+  {
+    name: 'Ndola Comfort Inn',
+    description: 'Affordable comfort in the heart of Ndola. Clean, well-maintained rooms with friendly service. Located near shopping centers and restaurants. Free breakfast and airport shuttle service included. Great value for money.',
+    location: 'Ndola',
+    address: '9 Zambia Way, Ndola, Zambia',
+    phone: '+260 212 728 345',
+    price: 260,
+    priceUnit: 'night',
+    latitude: -12.9630,
+    longitude: 28.6410,
+    amenities: JSON.stringify(['WiFi', 'Parking', 'AC']),
+    rating: 4.0,
+    totalRooms: 28,
+    gradient: 'from-teal-400 to-emerald-600',
+  },
+  {
+    name: 'Siavonga Beach Resort',
+    description: 'Zambia\'s best-kept secret - a beach resort on the shores of Lake Kariba. White sandy beaches, crystal-clear waters, and endless sunshine. Water sports, fishing, and sunset cruises available. The perfect family holiday destination.',
+    location: 'Siavonga',
+    address: '1 Lakeshore Boulevard, Siavonga, Zambia',
+    phone: '+260 216 243 789',
+    price: 650,
+    priceUnit: 'night',
+    latitude: -16.5430,
+    longitude: 28.7180,
+    amenities: JSON.stringify(['WiFi', 'Parking', 'Pool', 'Restaurant', 'AC', 'Bar']),
+    rating: 4.7,
+    totalRooms: 14,
+    gradient: 'from-blue-400 to-indigo-500',
+  },
+  {
+    name: 'Eastern Valley Lodge',
+    description: 'Nestled in the scenic Eastern Province valley, this lodge offers stunning mountain views and fresh mountain air. Ideal for hikers, bird watchers, and those seeking a peaceful escape. Home-cooked meals using fresh local ingredients.',
+    location: 'Chipata',
+    address: '45 Valley Road, Chipata, Zambia',
+    phone: '+260 216 225 012',
+    price: 220,
+    priceUnit: 'night',
+    latitude: -13.6450,
+    longitude: 32.6350,
+    amenities: JSON.stringify(['WiFi', 'Parking', 'Restaurant']),
+    rating: 3.9,
+    totalRooms: 10,
+    gradient: 'from-yellow-400 to-orange-500',
+  },
+];
 
 async function main() {
-  console.log('Seeding database...')
-
-  // Clear existing data
-  await db.favorite.deleteMany()
-  await db.activityLog.deleteMany()
-  await db.siteSetting.deleteMany()
-  await db.listing.deleteMany()
-  await db.category.deleteMany()
+  console.log('🌱 Seeding StayNow database...');
 
   // Create admin user
-  const adminExists = await db.user.findUnique({ where: { email: 'admin@housematezm.com' } })
-  if (!adminExists) {
-    const adminPassword = await hashPassword('Admin@123')
-    await db.user.create({
+  const admin = await db.user.create({
+    data: {
+      name: 'StayNow Admin',
+      contact: 'admin@staynow.co',
+    },
+  });
+  console.log(`✅ Created admin user: ${admin.id}`);
+
+  // Create sample user
+  const sampleUser = await db.user.create({
+    data: {
+      name: 'John Banda',
+      contact: '+260 977 123 456',
+    },
+  });
+  console.log(`✅ Created sample user: ${sampleUser.id}`);
+
+  // Create lodges
+  const createdLodges = [];
+  for (const lodge of lodgeData) {
+    const created = await db.lodge.create({
       data: {
-        name: 'System Admin',
-        email: 'admin@housematezm.com',
-        password: adminPassword,
-        role: 'admin',
+        name: lodge.name,
+        description: lodge.description,
+        location: lodge.location,
+        address: lodge.address,
+        phone: lodge.phone,
+        price: lodge.price,
+        priceUnit: lodge.priceUnit,
+        latitude: lodge.latitude,
+        longitude: lodge.longitude,
+        amenities: lodge.amenities,
+        rating: lodge.rating,
+        totalRooms: lodge.totalRooms,
       },
-    })
-    console.log('  ✓ Created admin user: admin@housematezm.com')
-  } else {
-    console.log('  ✓ Admin user already exists')
+    });
+    createdLodges.push(created);
+    console.log(`✅ Created lodge: ${lodge.name}`);
   }
 
-  // Create categories
-  const categoryMap = new Map<string, string>()
-  for (const cat of categories) {
-    const created = await db.category.create({ data: cat })
-    categoryMap.set(cat.name, created.id)
-    console.log(`  ✓ Created category: ${cat.name}`)
-  }
+  // Create some sample reservations
+  const statuses = ['PENDING', 'CONFIRMED', 'REJECTED'];
+  for (let i = 0; i < 5; i++) {
+    const lodgeIdx = i % createdLodges.length;
+    const status = statuses[i % statuses.length];
+    const expiresAt = new Date(Date.now() + (i < 2 ? 45 * 60 * 1000 : -30 * 60 * 1000)); // some expired
 
-  // Create listings with category links
-  for (const listing of listings) {
-    const categoryId = categoryMap.get(listing.category)
-    await db.listing.create({
+    await db.reservation.create({
       data: {
-        ...listing,
-        categoryId: categoryId || null,
+        userId: sampleUser.id,
+        lodgeId: createdLodges[lodgeIdx].id,
+        userName: 'John Banda',
+        userContact: '+260 977 123 456',
+        status,
+        expiresAt,
       },
-    })
-    console.log(`  ✓ Created: ${listing.title}`)
+    });
+    console.log(`✅ Created sample reservation #${i + 1} (${status})`);
   }
 
-  // Create default site settings
-  const settings = [
-    { key: 'site_name', value: 'Housemate ZM' },
-    { key: 'site_description', value: "Premium marketplace for renting anything in Zambia" },
-    { key: 'contact_email', value: 'info@housematezm.com' },
-    { key: 'contact_phone', value: '+260977000000' },
-    { key: 'default_currency', value: 'ZMW' },
-    { key: 'listings_per_page', value: '12' },
-    { key: 'allow_registrations', value: 'true' },
-    { key: 'require_listing_approval', value: 'false' },
-    { key: 'maintenance_mode', value: 'false' },
-  ]
-  for (const setting of settings) {
-    await db.siteSetting.create({ data: setting })
-  }
-  console.log('  ✓ Created site settings')
-
-  console.log(`\n✅ Seeded ${listings.length} listings, ${categories.length} categories, and admin user successfully!`)
+  console.log('\n🎉 Seeding complete!');
 }
 
 main()
-  .catch(console.error)
-  .finally(() => db.$disconnect())
+  .catch((e) => {
+    console.error('❌ Seed error:', e);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await db.$disconnect();
+  });

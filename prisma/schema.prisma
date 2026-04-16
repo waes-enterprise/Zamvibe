@@ -8,80 +8,46 @@ datasource db {
 }
 
 model User {
-  id            String        @id @default(cuid())
-  name          String
-  email         String        @unique
-  password      String
-  phone         String?
-  avatarUrl     String?
-  role          String        @default("user")
-  isBanned      Boolean       @default(false)
-  banReason     String?
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-  favorites     Favorite[]
-  listings      Listing[]
-  activityLogs  ActivityLog[]
+  id          String        @id @default(cuid())
+  name        String
+  contact     String
+  createdAt   DateTime      @default(now())
+  reservations Reservation[]
 }
 
-model Listing {
-  id           String    @id @default(cuid())
-  title        String
-  description  String
-  price        Float
-  priceUnit    String    @default("day")
-  location     String
-  category     String
-  imageUrl     String
-  tier         String    @default("standard")
-  contactPhone String?
-  contactEmail String?
-  isFeatured   Boolean   @default(false)
-  isApproved   Boolean   @default(true)
-  status       String    @default("active")
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  ownerId      String?
-  owner        User?     @relation(fields: [ownerId], references: [id], onDelete: SetNull)
-  favorites    Favorite[]
-  categoryId   String?
-  categoryRef  Category? @relation("ListingCategory", fields: [categoryId], references: [id], onDelete: SetNull)
+model Lodge {
+  id          String        @id @default(cuid())
+  name        String
+  description String
+  location    String
+  address     String
+  phone       String
+  price       Float
+  priceUnit   String        @default("night")
+  latitude    Float?
+  longitude   Float?
+  images      String        @default("[]")
+  amenities   String        @default("[]")
+  rating      Float         @default(4.0)
+  totalRooms  Int           @default(10)
+  createdAt   DateTime      @default(now())
+  reservations Reservation[]
 }
 
-model Favorite {
-  id        String   @id @default(cuid())
-  listingId String
-  sessionId String?
-  userId    String?
-  createdAt DateTime @default(now())
-  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
-  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
+model Reservation {
+  id          String        @id @default(cuid())
+  userId      String
+  lodgeId     String
+  userName    String
+  userContact String
+  status      String        @default("PENDING")
+  createdAt   DateTime      @default(now())
+  expiresAt   DateTime
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lodge       Lodge         @relation(fields: [lodgeId], references: [id], onDelete: Cascade)
 
-model Category {
-  id        String    @id @default(cuid())
-  name      String    @unique
-  slug      String    @unique
-  icon      String    @default("Building2")
-  sortOrder Int       @default(0)
-  isActive  Boolean   @default(true)
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  listings  Listing[] @relation("ListingCategory")
-}
-
-model ActivityLog {
-  id        String   @id @default(cuid())
-  action    String
-  details   String?
-  userId    String?
-  ipAddress String?
-  createdAt DateTime @default(now())
-  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
-}
-
-model SiteSetting {
-  key       String   @id
-  value     String
-  updatedAt DateTime @updatedAt
+  @@index([userId])
+  @@index([lodgeId])
+  @@index([status])
+  @@index([expiresAt])
 }
