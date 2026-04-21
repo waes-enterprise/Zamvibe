@@ -1,46 +1,25 @@
 ---
 Task ID: 1
-Agent: Super Z (main)
-Task: Build StayNow psychology-focused UI upgrade package with 10 Zambian lodge seed data
+Agent: Main Agent
+Task: Generate 13 sequential video clips of wooden Mercedes-Benz W123 build
 
 Work Log:
-- Created 10 realistic Zambian lodge seed entries covering Chingola, Kitwe, Ndola, Lusaka, Livingstone, Kafue, Chipata, Kabwe, Siavonga, Solwezi
-- Built 8 upgrade files: seed.ts, page.tsx (home), lodge-card.tsx, lodges/page.tsx, lodges/[id]/page.tsx, reservations/[id]/page.tsx, globals.css, layout.tsx
-- Added psychology features: urgency badges with pulse animations, 45-min countdown timer, "pay on arrival" trust signals, live availability counter, social proof bar
-- Added micro-interactions: fadeIn, slideUp, float, card-hover, gradient-text, stagger-children animations
-- Created self-contained installer script (staynow-psychology-upgrade.js)
-- Packaged as tarball (17KB)
+- User provided Veo API details (Google Generative AI) with model name "veo-3.1-lite"
+- Tested Veo API: model "veo-3.1-lite" returned 404 (doesn't exist)
+- Found "veo-3.0-generate-001" exists but geo-restricted from server
+- Found "veo-2.0-generate-001" exists but requires GCP billing
+- Fell back to built-in video generation (z-ai-web-dev-sdk)
+- Built-in API also returned 429 (rate limited) across all endpoints
+- Created batch_generate.mjs script with all 13 clip prompts and automatic retry logic
+- Script retries every 2 minutes, polls every 10s, saves completed clips to JSON
+- Running as background process (PID 2691)
+- State persisted in state.json - survives restarts
 
 Stage Summary:
-- Deliverable: /home/z/my-project/download/staynow-psych-upgrade.tar.gz
-- 10 Zambian lodges with real Unsplash images, descriptions, coordinates, amenities
-- Psychology-driven UI with urgency, trust, and retention design patterns
-- All files validated and packaged
-
----
-Task ID: 2
-Agent: Super Z (main)
-Task: Permanent fix of all StayNow build errors and data flow issues
-
-Work Log:
-- Cloned repo from waes-enterprise/Staynow (correct owner, not 799293)
-- Read ALL source files to identify 6 root causes:
-  1. Schema missing fields: availableRooms, reviewCount, featured, tags
-  2. Seed uses wrong field names: city→location, pricePerNight→price, imageUrl→images, roomsAvailable→availableRooms
-  3. API returns schema fields but UI expects different names (city, pricePerNight, imageUrl)
-  4. Missing components: theme-provider.tsx and app-sidebar.tsx imported but don't exist
-  5. Reservation flow broken: detail page sends {lodgeId} but API requires userName+userContact
-  6. next.config.ts missing output: "standalone"
-- Fixed all 6 issues across 13 files
-- Committed and pushed to GitHub: commit d0a7270
-
-Stage Summary:
-- All 6 root causes fixed permanently
-- Schema extended with 4 new fields for UI support
-- API routes now map schema→UI field names (location→city, price→pricePerNight, images→imageUrl)
-- Missing components created (theme-provider, app-sidebar)
-- Layout simplified (sidebar removed for public pages)
-- Lodge detail page: reservation dialog with name+phone form added
-- Reservation API: returns nested lodge object for detail page
-- Build config: standalone output + unsplash image domain
-- Successfully pushed to GitHub, Vercel should auto-deploy
+- Veo API key works but model name is wrong (user should use veo-3.0-generate-001)
+- Veo API is geo-restricted from server
+- Built-in video generator is rate-limited (429)
+- Batch generation script created and running at /home/z/my-project/download/w123-clips/
+- Will automatically generate all 13 clips once rate limit clears
+- Output: /home/z/my-project/download/w123-clips/clip{N}.json for each completed clip
+- Logs: /home/z/my-project/download/w123-clips/batch.log
