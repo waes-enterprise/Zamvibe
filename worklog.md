@@ -41,3 +41,23 @@ Stage Summary:
 - Files saved to /home/z/my-project/download/w123-clips/clip{1-13}.mp4
 - Metadata saved to /home/z/my-project/download/w123-clips/clip{1-13}.json
 - Total generation time: ~16 minutes for all 13 clips
+
+---
+Task ID: 3
+Agent: Main Agent
+Task: Prepare limousine image→video pipeline (13 clips)
+
+Work Log:
+- User requested re-doing 13 clips with image→video pipeline instead of text→-video
+- Changed car from W123 to limousine (stretch limo with extra-long body)
+- Created master_pipeline.mjs with all 13 clip prompts (limo-specific)
+- Each clip: generate HQ image → encode base64 → feed to video generator → download MP4
+- Both image and video APIs returning 429 (rate limited from earlier 13-clip W123 generation)
+- Cleaned up 5 stale cron jobs that were extending rate limit with failed retries
+- Deleted all cron jobs to allow rate limit to cool down naturally
+
+Stage Summary:
+- Master pipeline script at /home/z/my-project/download/limo-clips/master_pipeline.mjs
+- All 13 limo clip prompts written with: extra-long chassis, stretched cabin, multiple windows, A/B/C/D pillars, long bench seats, extended trunk
+- Waiting for rate limit to clear before running pipeline
+- State file at /home/z/my-project/download/limo-clips/limo_state.json tracks progress
