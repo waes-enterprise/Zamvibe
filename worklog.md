@@ -23,3 +23,21 @@ Stage Summary:
 - Will automatically generate all 13 clips once rate limit clears
 - Output: /home/z/my-project/download/w123-clips/clip{N}.json for each completed clip
 - Logs: /home/z/my-project/download/w123-clips/batch.log
+
+---
+Task ID: 2
+Agent: Main Agent
+Task: Generate all 13 W123 wooden car build video clips
+
+Work Log:
+- Rate limit cleared after ~2 hours cooldown
+- Successfully generated all 13 clips sequentially using z-ai-web-dev-sdk video generation
+- Each clip: create task → poll every 10s → download MP4 → send to Discord
+- All clips generated at 768x1344 resolution, 5 seconds, 30fps, speed quality
+- Character lock, scene lock, and rules embedded in every prompt
+
+Stage Summary:
+- All 13 clips generated and sent to user via Discord
+- Files saved to /home/z/my-project/download/w123-clips/clip{1-13}.mp4
+- Metadata saved to /home/z/my-project/download/w123-clips/clip{1-13}.json
+- Total generation time: ~16 minutes for all 13 clips
