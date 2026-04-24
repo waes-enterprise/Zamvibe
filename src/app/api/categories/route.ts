@@ -1,19 +1,27 @@
-import { NextResponse } from 'next/server'
+import { db } from '@/lib/db';
+import { NextResponse } from 'next/server';
 
-const categories = [
-  { name: 'All', icon: 'LayoutGrid' },
-  { name: 'Rooms', icon: 'Home' },
-  { name: 'Farms', icon: 'Tractor' },
-  { name: 'Offices', icon: 'Building2' },
-  { name: 'Storage', icon: 'Warehouse' },
-  { name: 'Event Spaces', icon: 'PartyPopper' },
-  { name: 'Garages', icon: 'Car' },
-  { name: 'Warehouses', icon: 'Warehouse' },
-  { name: 'Land', icon: 'Mountain' },
-  { name: 'Shops', icon: 'Store' },
-  { name: 'Parking', icon: 'CircleParking' },
-]
+const CATEGORIES = [
+  { name: 'Music', color: '#a855f7' },
+  { name: 'Gossip', color: '#f59e0b' },
+  { name: 'Viral', color: '#ef4444' },
+  { name: 'Lifestyle', color: '#22c55e' },
+];
 
 export async function GET() {
-  return NextResponse.json(categories)
+  try {
+    const categoriesWithCounts = await Promise.all(
+      CATEGORIES.map(async (cat) => {
+        const count = await db.post.count({
+          where: { category: cat.name, status: 'published' },
+        });
+        return { ...cat, count };
+      })
+    );
+
+    return NextResponse.json(categoriesWithCounts);
+  } catch (error) {
+    console.error('Error fetching categories:', error);
+    return NextResponse.json({ error: 'Failed to fetch categories' }, { status: 500 });
+  }
 }

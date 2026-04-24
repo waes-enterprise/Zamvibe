@@ -7,47 +7,39 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id          String        @id @default(cuid())
-  name        String
-  contact     String
-  createdAt   DateTime      @default(now())
-  reservations Reservation[]
+model Post {
+  id           String   @id @default(cuid())
+  headline     String
+  body         String   @default("")
+  category     String   @default("Viral")
+  imageUrl     String   @default("")
+  videoUrl     String   @default("")
+  isBreaking   Boolean  @default(false)
+  isFeatured   Boolean  @default(false)
+  views        Int      @default(0)
+  shares       Int      @default(0)
+  clicks       Int      @default(0)
+  status       String   @default("published")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
 
-model Lodge {
-  id          String        @id @default(cuid())
-  name        String
-  description String
-  location    String
-  address     String
-  phone       String
-  price       Float
-  priceUnit   String        @default("night")
-  latitude    Float?
-  longitude   Float?
-  images      String        @default("[]")
-  amenities   String        @default("[]")
-  rating      Float         @default(4.0)
-  totalRooms  Int           @default(10)
-  createdAt   DateTime      @default(now())
-  reservations Reservation[]
+model TrendingTopic {
+  id        String   @id @default(cuid())
+  title     String
+  rank      Int
+  posts     Int      @default(0)
+  category  String   @default("")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
-model Reservation {
-  id          String        @id @default(cuid())
-  userId      String
-  lodgeId     String
-  userName    String
-  userContact String
-  status      String        @default("PENDING")
-  createdAt   DateTime      @default(now())
-  expiresAt   DateTime
-  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  lodge       Lodge         @relation(fields: [lodgeId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@index([lodgeId])
-  @@index([status])
-  @@index([expiresAt])
+model VideoClip {
+  id        String   @id @default(cuid())
+  headline  String
+  videoUrl  String
+  thumbnail String   @default("")
+  views     Int      @default(0)
+  category  String   @default("Viral")
+  createdAt DateTime @default(now())
 }

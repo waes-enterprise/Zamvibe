@@ -13,24 +13,27 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: "#1e1b4b",
+  themeColor: "#0a0a0a",
 };
 
 export const metadata: Metadata = {
-  title: "StayNow - Find a Place to Stay",
+  title: "ZamVibe — Zambian Entertainment & Viral News",
   description:
-    "Find and reserve nearby lodges in Zambia. Browse lodges in Lusaka, Livingstone, Kitwe, Ndola, Siavonga, and Chipata. Book your stay instantly.",
+    "Real-time Zambian entertainment news, celebrity gossip, viral videos, and trending stories. Your #1 source for Zambian pop culture.",
   keywords: [
     "Zambia",
-    "lodge",
-    "reservation",
-    "hotel",
-    "accommodation",
+    "Zambian news",
+    "entertainment",
+    "celebrity gossip",
+    "viral",
+    "music",
+    "ZamVibe",
+    "Chef 187",
+    "Yo Maps",
+    "Mampi",
     "Lusaka",
-    "Livingstone",
-    "StayNow",
   ],
-  authors: [{ name: "StayNow" }],
+  authors: [{ name: "ZamVibe" }],
 };
 
 export default function RootLayout({
@@ -39,14 +42,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className="dark" suppressHydrationWarning>
       <head>
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <link rel="icon" href="/zamvibe/favicon.ico" />
       </head>
       <body
-        className={`${geistSans.variable} font-sans antialiased bg-white text-slate-900`}
+        className={`${geistSans.variable} font-sans antialiased bg-[#0a0a0a] text-white`}
       >
         {children}
         <Toaster />
