@@ -95,3 +95,36 @@ Stage Summary:
 - All features working: breaking news ticker, featured rotation, category filtering, infinite scroll, trending, video feed, post creation, WhatsApp sharing
 - 26 posts across Music/Gossip/Viral/Lifestyle with realistic Zambian content
 - Clean lint (0 errors in src/)
+---
+Task ID: 1
+Agent: Super Z (main)
+Task: Fix OpenClaw Bot to be a general-purpose coding agent
+
+Work Log:
+- Fetched current openclaw-bot repo code from GitHub (api/index.py, vercel.json, requirements.txt)
+- Diagnosed 4 key issues:
+  1. Model too weak: llama-3.1-8b-instant (8B) couldn't follow complex coding instructions
+  2. vercel.json routing broken: /api/webhook pointed to non-existent webhook.py
+  3. /mode zamvibe command set env vars that don't persist in Vercel serverless
+  4. ZAMVIBE_SYSTEM prompt was hijacking responses when mode was set
+- Rewrote api/index.py with:
+  - Upgraded model to llama-3.3-70b-versatile (70B, much better instruction following)
+  - Removed ZAMVIBE_SYSTEM and broken /mode command entirely
+  - Fixed HTML escaping in send_telegram to prevent parse errors
+  - Added timeout handling for Groq API calls (60s)
+  - Added temperature: 0.7 for better code generation
+  - Increased max_tokens for coding commands to 4000
+  - Added validation for commands requiring arguments (/review, /debug, /architect)
+  - Improved smart code detection for non-command messages
+  - Cleaned up and hardened all error handling
+- Fixed vercel.json: /api/webhook now correctly routes to /api/index.py
+- Pushed all changes via GitHub API (commit f0df0eff)
+- Vercel auto-deployed successfully
+
+Stage Summary:
+- Bot upgraded from v2 to v3
+- Model: llama-3.1-8b-instant → llama-3.3-70b-versatile
+- Removed all ZamVibe-specific default behavior
+- Fixed Vercel routing (webhook.py → index.py)
+- Deployment: success on Vercel
+- User should test bot in Telegram now
