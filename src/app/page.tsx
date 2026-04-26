@@ -365,11 +365,11 @@ function QuickLinksStrip({ activeCategory, onCategoryChange }: { activeCategory:
     { label: '🎵 Music', cat: 'Music' },
     { label: '💬 Gossip', cat: 'Gossip' },
     { label: '✨ Lifestyle', cat: 'Lifestyle' },
-    { label: '⚽ Sports', cat: 'All' },
-    { label: '🏛️ Politics', cat: 'All' },
-    { label: '💼 Business', cat: 'All' },
-    { label: '📱 Tech', cat: 'All' },
-    { label: '😂 Comedy', cat: 'All' },
+    { label: '⚽ Sports', cat: 'Sports' },
+    { label: '🏛️ Politics', cat: 'Politics' },
+    { label: '💼 Business', cat: 'Business' },
+    { label: '📱 Tech', cat: 'Tech' },
+    { label: '😂 Comedy', cat: 'Comedy' },
   ];
 
   return (
