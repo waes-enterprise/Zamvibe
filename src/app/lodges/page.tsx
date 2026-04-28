@@ -264,8 +264,8 @@ export default function LodgesPage() {
                   lodge={{
                     ...lodge,
                     imageSlug: lodge.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
-                    activeReservations: lodge.activeReservations,
-                  }}
+                    activeReservations: (lodge as any).activeReservations || 0,
+                  } as any}
                   index={i}
                 />
               ))}

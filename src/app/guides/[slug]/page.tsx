@@ -97,7 +97,7 @@ export default function GuideDetailPage() {
     async function fetchListings() {
       setIsLoadingListings(true)
       try {
-        const searchTerms = guide.name.split(',').map(s => s.trim().toLowerCase()).filter(Boolean)
+        const searchTerms = guide?.name?.split(',').map(s => s.trim().toLowerCase()).filter(Boolean) || []
         // Try to match by area name (search for key terms)
         const searchName = searchTerms[0]
         const res = await fetch(

@@ -431,7 +431,7 @@ export default function AdminUsersPage() {
             <DialogDescription>
               {banDialog?.isBanned
                 ? `Are you sure you want to unban ${banDialog.userName}? They will regain full access to the platform.`
-                : `Ban ${banDialog.userName} from the platform. They will lose access until unbanned.`}
+                : `Ban ${banDialog?.userName || 'this user'} from the platform. They will lose access until unbanned.`}
             </DialogDescription>
           </DialogHeader>
 

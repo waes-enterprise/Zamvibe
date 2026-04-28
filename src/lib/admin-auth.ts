@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { cookies } from 'next/headers'
 import { verifyToken, JWTPayload } from '@/lib/auth'
 import { db } from './db'

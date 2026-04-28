@@ -37,6 +37,15 @@
     ".next/dev/types/**/*.ts"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "Staynow",
+    "openclaw-bot-fix",
+    "staynow-fix",
+    "staynow-ui-upgrade",
+    "staynow-upgrade-v2",
+    "mini-services",
+    "examples",
+    "download",
+    "skills"
   ]
 }
