@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -20,6 +20,7 @@ model Post {
   shares       Int      @default(0)
   clicks       Int      @default(0)
   status       String   @default("published")
+  source       String   @default("")
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }
