@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 // ============================================================
 // ZamVibe Entertainment News Fetcher
-// Pulls entertainment content from Zambian & African sources
+// Pulls entertainment content from 30+ African entertainment sources
 // ============================================================
 
 interface RSSItem {
@@ -25,31 +25,54 @@ interface FeedSource {
   selector?: string;
 }
 
-// Entertainment-focused RSS sources (Zambian & African)
+// 30+ pure African entertainment sources
 const ENTERTAINMENT_FEEDS: FeedSource[] = [
-  // Zambian sources
+  // === ZAMBIAN ENTERTAINMENT ===
   { name: 'Kalemba', url: 'https://kalemba.net/feed/', category: 'Gossip', type: 'rss' },
   { name: 'Zed Corner', url: 'https://www.zedcorner.com/feed/', category: 'Music', type: 'rss' },
-  { name: 'Mwebantu', url: 'https://www.mwebantu.com/feed/', category: 'Viral', type: 'rss' },
-  { name: 'Tumfweko', url: 'https://tumfweko.com/feed/', category: 'Viral', type: 'rss' },
-  { name: 'Zambia Reports', url: 'https://zambiareports.com/feed/', category: 'Viral', type: 'rss' },
-  { name: 'Daily Mail', url: 'https://www.daily-mail.co.zm/feed/', category: 'Lifestyle', type: 'rss' },
-  { name: 'Zambian Observer', url: 'https://zambianobserver.com/feed/', category: 'Viral', type: 'rss' },
-  { name: 'Lusaka Times', url: 'https://www.lusakatimes.com/feed/', category: 'Lifestyle', type: 'rss' },
-  // African entertainment sources
-  { name: 'OkayAfrica', url: 'https://www.okayAfrica.com/feed/', category: 'Music', type: 'rss' },
-  { name: 'Pulse Live Kenya', url: 'https://pulselive.co.ke/feed/', category: 'Celebrity', type: 'rss' },
-  { name: 'Citizen TV Kenya', url: 'https://citizen.digital/feed/', category: 'Celebrity', type: 'rss' },
+  { name: 'Mwebantu Entertainment', url: 'https://www.mwebantu.com/entertainment/feed/', category: 'Entertainment', type: 'rss' },
+  { name: 'Tumfweko Entertainment', url: 'https://tumfweko.com/category/entertainment/feed/', category: 'Entertainment', type: 'rss' },
+
+  // === NIGERIAN ENTERTAINMENT ===
+  { name: 'BellaNaija', url: 'https://bellanaija.com/feed/', category: 'Celebrity', type: 'rss' },
+  { name: 'Nigeria Entertainment Today', url: 'https://net.ng/feed/', category: 'Celebrity', type: 'rss' },
+  { name: 'Pulse Nigeria', url: 'https://pulse.ng/entertainment/feed/', category: 'Celebrity', type: 'rss' },
+  { name: 'Laila Ijeoma', url: 'https://www.lailasnews.com/feed/', category: 'Gossip', type: 'rss' },
+  { name: 'Kemi Filani', url: 'https://www.kemifilani.ng/feed/', category: 'Gossip', type: 'rss' },
+  { name: 'Nollywood Post', url: 'https://nollywoodpost.com.ng/feed/', category: 'Movies & TV', type: 'rss' },
+
+  // === SOUTH AFRICAN ENTERTAINMENT ===
   { name: 'Briefly News', url: 'https://briefly.co.za/feed/', category: 'Celebrity', type: 'rss' },
   { name: 'ZAlebs', url: 'https://www.zalebs.com/feed/', category: 'Celebrity', type: 'rss' },
   { name: 'SA Hip Hop Mag', url: 'https://sahiphopmag.co.za/feed/', category: 'Music', type: 'rss' },
-  { name: 'GhanaWeb', url: 'https://www.ghanaweb.com/rssfeed.php', category: 'Viral', type: 'rss' },
-  { name: 'Nigeria Entertainment Today', url: 'https://net.ng/feed/', category: 'Celebrity', type: 'rss' },
-  { name: 'BellaNaija', url: 'https://bellanaija.com/feed/', category: 'Celebrity', type: 'rss' },
-  // Global entertainment with African relevance
-  { name: 'Billboard', url: 'https://www.billboard.com/feed/', category: 'Music', type: 'rss' },
-  { name: 'Complex', url: 'https://www.complex.com/feed/', category: 'Music', type: 'rss' },
-  { name: 'Rolling Stone', url: 'https://www.rollingstone.com/feed/', category: 'Music', type: 'rss' },
+  { name: 'Drum Magazine', url: 'https://www.drum.co.za/feed/', category: 'Celebrity', type: 'rss' },
+  { name: 'ZAlebs TV', url: 'https://www.zalebs.com/category/tv/feed/', category: 'Movies & TV', type: 'rss' },
+
+  // === GHANAIAN ENTERTAINMENT ===
+  { name: 'GhanaWeb Entertainment', url: 'https://www.ghanaweb.com/GhanaHomePage/entertainment/rss.php', category: 'Entertainment', type: 'rss' },
+  { name: 'Ameyaw Debrah', url: 'https://www.ameyawdebrah.com/feed/', category: 'Celebrity', type: 'rss' },
+  { name: 'Yen.com.gh', url: 'https://yen.com.gh/entertainment/feed/', category: 'Celebrity', type: 'rss' },
+
+  // === KENYAN ENTERTAINMENT ===
+  { name: 'Pulse Live Kenya', url: 'https://pulselive.co.ke/entertainment/feed/', category: 'Celebrity', type: 'rss' },
+  { name: 'Kenyans.co.ke', url: 'https://www.kenyans.co.ke/feed/', category: 'Celebrity', type: 'rss' },
+  { name: 'Classic 105', url: 'https://classic105.com/feed/', category: 'Celebrity', type: 'rss' },
+
+  // === PAN-AFRICAN MUSIC & CULTURE ===
+  { name: 'OkayAfrica', url: 'https://www.okayafrica.com/feed/', category: 'Music', type: 'rss' },
+  { name: 'This Is Africa', url: 'https://thisisafrica.me/feed/', category: 'Culture', type: 'rss' },
+  { name: 'Brittle Paper', url: 'https://brittlepaper.com/feed/', category: 'Culture', type: 'rss' },
+  { name: 'Music in Africa', url: 'https://www.musicinafrica.net/feed', category: 'Music', type: 'rss' },
+
+  // === GLOBAL ENTERTAINMENT (Afrobeats/African relevant) ===
+  { name: 'Billboard Afrobeats', url: 'https://www.billboard.com/feed/', category: 'Music', type: 'rss' },
+  { name: 'Complex Music', url: 'https://www.complex.com/music/feed/', category: 'Music', type: 'rss' },
+  { name: 'Rolling Stone Music', url: 'https://www.rollingstone.com/music/music-news/feed/', category: 'Music', type: 'rss' },
+  { name: 'The Fader', url: 'https://www.thefader.com/feed/', category: 'Music', type: 'rss' },
+  { name: 'Hot New Hip Hop', url: 'https://www.hotnewhiphop.com/feed/', category: 'Music', type: 'rss' },
+  { name: 'BET', url: 'https://www.bet.com/feed', category: 'Celebrity', type: 'rss' },
+  { name: 'E! Online', url: 'https://www.eonline.com/feed', category: 'Celebrity', type: 'rss' },
+  { name: 'TMZ', url: 'https://www.tmz.com/feed/', category: 'Gossip', type: 'rss' },
 ];
 
 // Entertainment keywords for filtering & categorization
@@ -86,15 +109,31 @@ const ENTERTAINMENT_KEYWORDS = {
     'outrage', 'drama', 'caught on camera', 'must see', 'heartbreaking', 'inspiring',
     'hero', 'miracle', 'bizarre', 'weird', 'crazy', 'mad', 'lit', 'fire', 'slay',
     'goals', 'mood', 'periodt', 'no cap', 'bet', 'facts', 'based', 'cooked'],
+  Culture: ['culture', 'african culture', 'heritage', 'festival', 'tradition', 'art',
+    'exhibition', 'gallery', 'museum', 'african art', 'pan african', 'afrofuturism',
+    'literature', 'book launch', 'author', 'novel', 'poetry', 'spoken word'],
 };
 
 const GENERAL_EXCLUDE_KEYWORDS = [
+  // Politics & Government
   'politics', 'election', 'vote', 'parliament', 'president', 'minister', 'cabinet',
   'opposition', 'ruling party', 'constitution', 'legislation', 'budget speech',
+  'governor', 'senator', 'mayor', 'councillor', 'mp ', 'member of parliament',
+  'political party', 'campaign rally', 'poll', 'ballot', 'inauguration',
+  // Economy & Policy
   'inflation rate', 'gdp', 'trade deficit', 'fiscal', 'monetary policy', 'treasury',
   'imf', 'world bank', 'donor', 'aid package', 'debt relief', 'loan',
-  'corruption scandal', 'anti-corruption', 'tribunal', 'judiciary',
+  'tax reform', 'revenue authority', 'central bank', 'interest rate',
+  'economic growth', 'economic outlook', 'funding', 'budget allocation',
   'mining tax', 'copper export', 'fertilizer subsidy', 'agricultural policy',
+  // Conflict & Security
+  'military', 'army', 'insurgency', 'terrorism', 'security forces', 'peacekeeping',
+  'armed conflict', 'ceasefire', 'war zone', 'refugee crisis', 'humanitarian',
+  'corruption scandal', 'anti-corruption', 'tribunal', 'judiciary',
+  'arrest warrant', 'court ruling', 'prosecution', 'sentence',
+  // Infrastructure (boring)
+  'road construction', 'infrastructure development', 'power outage', 'water shortage',
+  'healthcare system', 'education reform', 'civil service',
 ];
 
 function classifyContent(title: string, description: string): string {
@@ -248,6 +287,8 @@ function getPlaceholderImage(title: string, category: string): string {
     Fashion: 'e91e63',
     Viral: '2ecc71',
     Lifestyle: '1abc9c',
+    Culture: '00bcd4',
+    Entertainment: 'ff5722',
   };
   const color = colors[category] || 'e74c3c';
   return `https://placehold.co/800x450/${color}/ffffff?text=${seed}`;

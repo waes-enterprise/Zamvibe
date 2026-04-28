@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, startTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
@@ -49,7 +49,9 @@ export default function AdminPage() {
   // Auth
   useEffect(() => {
     const auth = localStorage.getItem('zamvibe_admin');
-    if (auth === 'true') setAuthenticated(true);
+    if (auth === 'true') {
+      startTransition(() => setAuthenticated(true));
+    }
   }, []);
 
   const handleLogin = (e: React.FormEvent) => {
@@ -405,9 +407,9 @@ export default function AdminPage() {
             )}
 
             <div className="mt-8 text-left">
-              <h3 className="font-semibold text-sm mb-3 text-gray-400">Sources (20+ feeds)</h3>
+              <h3 className="font-semibold text-sm mb-3 text-gray-400">Sources (36 feeds)</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-gray-500">
-                {["Kalemba (Gossip)", "Zed Corner (Music)", "Mwebantu (Viral)", "Tumfweko (News)", "Zambia Reports", "Daily Mail", "Zambian Observer", "Lusaka Times", "OkayAfrica (Music)", "Pulse Live Kenya", "Citizen TV Kenya", "Briefly News SA", "ZAlebs (Celebrity)", "SA Hip Hop Mag", "GhanaWeb", "Nigeria Ent. Today", "BellaNaija", "Billboard", "Complex", "Rolling Stone"].map(s => (
+                {["Kalemba (Gossip)", "Zed Corner (Music)", "Mwebantu Ent.", "Tumfweko Ent.", "BellaNaija (Celebrity)", "Nigeria Ent. Today", "Pulse Nigeria", "Laila Ijeoma (Gossip)", "Kemi Filani (Gossip)", "Nollywood Post", "Briefly News SA", "ZAlebs (Celebrity)", "SA Hip Hop Mag", "Drum Magazine", "ZAlebs TV", "GhanaWeb Ent.", "Ameyaw Debrah", "Yen.com.gh", "Pulse Live Kenya", "Kenyans.co.ke", "Classic 105", "OkayAfrica (Music)", "This Is Africa (Culture)", "Brittle Paper (Culture)", "Music in Africa", "Billboard Afrobeats", "Complex Music", "Rolling Stone Music", "The Fader", "Hot New Hip Hop", "BET", "E! Online", "TMZ (Gossip)"].map(s => (
                   <div key={s} className="flex items-center gap-1.5 bg-[#141414] rounded-lg px-3 py-2">
                     <Newspaper className="w-3 h-3 text-red-400" /> {s}
                   </div>

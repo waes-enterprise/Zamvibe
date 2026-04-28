@@ -2,13 +2,13 @@ import type { MetadataRoute } from 'next'
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'Housemate ZM — Zambia\'s Premier Property Marketplace',
-    short_name: 'Housemate',
-    description: 'Find houses, apartments, land, and commercial properties for rent and sale across Zambia.',
+    name: 'ZamVibe',
+    short_name: 'ZamVibe',
+    description: "Africa's #1 Entertainment Hub — Music, Celebrity Gossip, Viral Stories",
     start_url: '/',
     display: 'standalone',
-    background_color: '#f8f9fa',
-    theme_color: '#006633',
+    background_color: '#0f0f0f',
+    theme_color: '#ff4444',
     orientation: 'portrait-primary',
     scope: '/',
     icons: [
@@ -31,7 +31,7 @@ export default function manifest(): MetadataRoute.Manifest {
         purpose: 'maskable',
       },
     ],
-    categories: ['real estate', 'property', 'marketplace'],
+    categories: ['entertainment', 'music', 'news', 'celebrity'],
     lang: 'en',
     dir: 'ltr',
   }

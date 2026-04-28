@@ -13,13 +13,13 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: "#0a0a0a",
+  themeColor: "#ff4444",
 };
 
 export const metadata: Metadata = {
-  title: "ZamVibe — Zambian Entertainment & Viral News",
+  title: "ZamVibe — Africa's #1 Entertainment Hub",
   description:
-    "Real-time Zambian entertainment news, celebrity gossip, viral videos, and trending stories. Your #1 source for Zambian pop culture.",
+    "Real-time African entertainment news, celebrity gossip, music, viral videos, and trending stories from Zambia, Nigeria, South Africa, Ghana, Kenya & more.",
   keywords: [
     "Zambia",
     "Zambian news",
@@ -50,7 +50,7 @@ export default function RootLayout({
         <link rel="icon" href="/zamvibe/favicon.ico" />
       </head>
       <body
-        className={`${geistSans.variable} font-sans antialiased bg-[#0a0a0a] text-white`}
+        className={`${geistSans.variable} font-sans antialiased bg-[#0f0f0f] text-white`}
       >
         {children}
         <Toaster />
