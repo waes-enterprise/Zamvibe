@@ -257,6 +257,49 @@ export function sendPasswordResetEmail(
   ).catch(() => {})
 }
 
+/** Contact form notification email */
+export function sendContactEmail(data: { name: string; email: string; subject: string; message: string }): void {
+  const html = buildEmailHtml(/* html */ `
+    <h2 style="margin:0 0 16px;font-size:20px;color:#ffffff;">New Contact Form Submission</h2>
+    <p style="margin:0 0 16px;color:#aaaaaa;font-size:15px;line-height:1.6;">
+      You received a new message from the ZamVibe contact form.
+    </p>
+    <blockquote style="margin:0 0 24px;padding:16px;border-left:4px solid #ff4444;background-color:#1a1a1a;border-radius:0 8px 8px 0;">
+      <p style="margin:0 0 8px;color:#ffffff;font-size:14px;"><strong>Name:</strong> ${escapeHtml(data.name)}</p>
+      <p style="margin:0 0 8px;color:#ffffff;font-size:14px;"><strong>Email:</strong> ${escapeHtml(data.email)}</p>
+      <p style="margin:0 0 8px;color:#ffffff;font-size:14px;"><strong>Subject:</strong> ${escapeHtml(data.subject)}</p>
+      <p style="margin:0;color:#aaaaaa;font-size:14px;line-height:1.6;">${escapeHtml(data.message)}</p>
+    </blockquote>
+  `)
+
+  sendEmail(
+    process.env.ADMIN_EMAIL || 'admin@zamvibe.com',
+    `ZamVibe Contact: ${data.subject}`,
+    html,
+  ).catch(() => {})
+}
+
+/** Newsletter confirmation email */
+export function sendNewsletterConfirmation(email: string): void {
+  const html = buildEmailHtml(/* html */ `
+    <h2 style="margin:0 0 16px;font-size:20px;color:#ffffff;">You're Subscribed! 🎉</h2>
+    <p style="margin:0 0 16px;color:#aaaaaa;font-size:15px;line-height:1.6;">
+      Thanks for subscribing to the ZamVibe newsletter! You'll now receive the latest entertainment news, trending stories, and exclusive content straight to your inbox.
+    </p>
+    <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto;">
+      <tr>
+        <td style="background-color:#ff4444;border-radius:6px;">
+          <a href="${APP_URL}" style="display:inline-block;padding:12px 24px;color:#ffffff;font-weight:600;font-size:14px;text-decoration:none;">
+            Explore ZamVibe
+          </a>
+        </td>
+      </tr>
+    </table>
+  `)
+
+  sendEmail(email, 'Welcome to ZamVibe Newsletter! 🎬', html).catch(() => {})
+}
+
 // ─── Helpers ───────────────────────────────────────────────────────────
 function escapeHtml(str: string): string {
   return str

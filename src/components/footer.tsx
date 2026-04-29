@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 
 function FacebookIcon({ className }: { className?: string }) {
   return (
@@ -43,17 +44,16 @@ function YouTubeIcon({ className }: { className?: string }) {
 const footerLinks = {
   quickLinks: [
     { label: 'Home', href: '/' },
-    { label: 'Trending', href: '/' },
-    { label: 'Music', href: '/' },
-    { label: 'Videos', href: '/' },
-    { label: 'Categories', href: '/' },
+    { label: 'About', href: '/about' },
+    { label: 'Contact', href: '/contact' },
+    { label: 'FAQ', href: '/faq' },
   ],
-  entertainment: [
-    { label: 'Music', href: '/' },
-    { label: 'Celebrity Gossip', href: '/' },
-    { label: 'Movies & TV', href: '/' },
-    { label: 'Comedy', href: '/' },
-    { label: 'Fashion', href: '/' },
+  categories: [
+    { label: 'Music', href: '/?category=Music' },
+    { label: 'Celebrity', href: '/?category=Celebrity' },
+    { label: 'Movies & TV', href: '/?category=Movies+%26+TV' },
+    { label: 'Comedy', href: '/?category=Comedy' },
+    { label: 'Fashion', href: '/?category=Fashion' },
   ],
   legal: [
     { label: 'Privacy Policy', href: '/privacy' },
@@ -64,11 +64,11 @@ const footerLinks = {
 }
 
 const socialLinks = [
-  { icon: FacebookIcon, href: '#', label: 'Facebook' },
-  { icon: TwitterIcon, href: '#', label: 'X (Twitter)' },
-  { icon: InstagramIcon, href: '#', label: 'Instagram' },
-  { icon: TikTokIcon, href: '#', label: 'TikTok' },
-  { icon: YouTubeIcon, href: '#', label: 'YouTube' },
+  { icon: FacebookIcon, href: 'https://facebook.com/zamvibe', label: 'Facebook' },
+  { icon: TwitterIcon, href: 'https://twitter.com/zamvibe', label: 'X (Twitter)' },
+  { icon: InstagramIcon, href: 'https://instagram.com/zamvibe', label: 'Instagram' },
+  { icon: TikTokIcon, href: 'https://tiktok.com/@zamvibe', label: 'TikTok' },
+  { icon: YouTubeIcon, href: 'https://youtube.com/@zamvibe', label: 'YouTube' },
 ]
 
 export function Footer() {
@@ -85,7 +85,10 @@ export function Footer() {
               </span>
             </Link>
             <p className="text-[#aaaaaa] text-sm leading-relaxed max-w-sm">
-              Africa&apos;s #1 Entertainment Hub — Your daily dose of music, celebrity gossip, movies, fashion, comedy, and viral trends from across the continent.
+              Africa&apos;s #1 Entertainment Hub — Your daily dose of music, celebrity gossip, movies, fashion, comedy, and viral trends from Zambia, Nigeria, South Africa, Ghana, Kenya & more.
+            </p>
+            <p className="text-[#666666] text-xs mt-3">
+              Real-time news from 36+ African entertainment sources. Built with passion in Lusaka, Zambia.
             </p>
             {/* Social media icons */}
             <div className="flex items-center gap-3 mt-6">
@@ -123,13 +126,13 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Entertainment */}
+          {/* Categories */}
           <div>
             <h3 className="text-sm font-semibold uppercase tracking-wider text-white mb-4">
-              Entertainment
+              Categories
             </h3>
             <ul className="space-y-3">
-              {footerLinks.entertainment.map((link) => (
+              {footerLinks.categories.map((link) => (
                 <li key={link.label}>
                   <Link
                     href={link.href}
@@ -169,7 +172,7 @@ export function Footer() {
               &copy; 2026 ZamVibe. All rights reserved. Built with ❤️ in Zambia.
             </p>
             <p className="text-[#666666] text-xs">
-              Africa&apos;s #1 Entertainment Hub
+              Africa&apos;s #1 Entertainment Hub — 36+ Sources, Real-Time Updates
             </p>
           </div>
         </div>

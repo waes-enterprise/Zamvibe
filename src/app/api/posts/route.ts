@@ -1,6 +1,7 @@
 import { db } from '@/lib/db';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import { verifyToken } from '@/lib/auth';
 
 const postSchema = z.object({
   headline: z.string().min(3, 'Headline must be at least 3 characters'),
@@ -12,6 +13,16 @@ const postSchema = z.object({
   isFeatured: z.boolean().default(false),
   status: z.string().default('published'),
 });
+
+// Helper to verify admin JWT token
+async function verifyAdminAuth(request: NextRequest): Promise<boolean> {
+  const authHeader = request.headers.get('authorization');
+  if (!authHeader?.startsWith('Bearer ')) return false;
+
+  const token = authHeader.replace('Bearer ', '');
+  const payload = await verifyToken(token);
+  return payload?.role === 'admin';
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -66,22 +77,9 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    // Simple auth check for mutations
-    const authHeader = request.headers.get('authorization');
-    const adminPassword = process.env.ADMIN_PASSWORD || 'zamvibe2025';
-    if (authHeader) {
-      const token = authHeader.replace('Bearer ', '');
-      let isValid = token === adminPassword;
-      if (!isValid) {
-        try {
-          const decoded = Buffer.from(token, 'base64').toString('utf-8');
-          isValid = decoded.startsWith('admin:');
-        } catch {}
-      }
-      if (!isValid) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-      }
-    } else {
+    // Verify admin JWT authentication
+    const isAuth = await verifyAdminAuth(request);
+    if (!isAuth) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -99,5 +97,31 @@ export async function POST(request: NextRequest) {
     }
     console.error('Error creating post:', error);
     return NextResponse.json({ error: 'Failed to create post' }, { status: 500 });
+  }
+}
+
+export async function PUT(request: NextRequest) {
+  try {
+    const isAuth = await verifyAdminAuth(request);
+    if (!isAuth) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const body = await request.json();
+    const { id, ...updateData } = body;
+
+    if (!id) {
+      return NextResponse.json({ error: 'Post ID is required' }, { status: 400 });
+    }
+
+    const post = await db.post.update({
+      where: { id },
+      data: updateData,
+    });
+
+    return NextResponse.json(post);
+  } catch (error) {
+    console.error('Error updating post:', error);
+    return NextResponse.json({ error: 'Failed to update post' }, { status: 500 });
   }
 }

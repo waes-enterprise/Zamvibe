@@ -492,10 +492,12 @@ function PostModal({ post, open, onClose }: { post: Post | null; open: boolean; 
   };
   const shareTwitter = () => {
     const text = encodeURIComponent(post.headline);
-    window.open(`https://twitter.com/intent/tweet?text=${text}&url=zamvibe.vercel.app`, '_blank');
+    const url = encodeURIComponent(window.location.href);
+    window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank');
   };
   const shareFacebook = () => {
-    window.open(`https://www.facebook.com/sharer/sharer.php?u=zamvibe.vercel.app`, '_blank');
+    const url = encodeURIComponent(window.location.href);
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank');
   };
 
   return (
@@ -722,8 +724,20 @@ export default function ZamVibePage() {
   const handleFetchNews = async () => {
     setFetching(true);
     try {
-      await fetch('/api/admin/fetch-news', { method: 'POST' });
-      fetchInitialData();
+      const res = await fetch('/api/admin/fetch-news', { method: 'POST' });
+      if (res.ok) {
+        // Reload posts from API after fetching
+        const postsRes = await fetch('/api/posts?limit=50');
+        if (postsRes.ok) {
+          const data = await postsRes.json();
+          setPosts(data.posts || []);
+        }
+        const trendingRes = await fetch('/api/posts/trending');
+        if (trendingRes.ok) {
+          const data = await trendingRes.json();
+          setTrendingTopics(data.trendingTopics || []);
+        }
+      }
     } catch {}
     setFetching(false);
   };

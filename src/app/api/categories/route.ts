@@ -3,8 +3,14 @@ import { NextResponse } from 'next/server';
 
 const CATEGORIES = [
   { name: 'Music', color: '#a855f7' },
+  { name: 'Celebrity', color: '#3ea6ff' },
   { name: 'Gossip', color: '#f59e0b' },
   { name: 'Viral', color: '#ef4444' },
+  { name: 'Movies & TV', color: '#e91e63' },
+  { name: 'Comedy', color: '#f97316' },
+  { name: 'Fashion', color: '#ec4899' },
+  { name: 'Culture', color: '#06b6d4' },
+  { name: 'Entertainment', color: '#ff4444' },
   { name: 'Lifestyle', color: '#22c55e' },
 ];
 

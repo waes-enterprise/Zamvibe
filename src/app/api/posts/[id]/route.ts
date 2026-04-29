@@ -1,27 +1,25 @@
 import { db } from '@/lib/db';
 import { NextRequest, NextResponse } from 'next/server';
+import { verifyToken } from '@/lib/auth';
+
+// Helper to verify admin JWT token
+async function verifyAdminAuth(request: NextRequest): Promise<boolean> {
+  const authHeader = request.headers.get('authorization');
+  if (!authHeader?.startsWith('Bearer ')) return false;
+
+  const token = authHeader.replace('Bearer ', '');
+  const payload = await verifyToken(token);
+  return payload?.role === 'admin';
+}
 
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    // Simple auth check for deletions
-    const authHeader = request.headers.get('authorization');
-    const adminPassword = process.env.ADMIN_PASSWORD || 'zamvibe2025';
-    if (authHeader) {
-      const token = authHeader.replace('Bearer ', '');
-      let isValid = token === adminPassword;
-      if (!isValid) {
-        try {
-          const decoded = Buffer.from(token, 'base64').toString('utf-8');
-          isValid = decoded.startsWith('admin:');
-        } catch {}
-      }
-      if (!isValid) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-      }
-    } else {
+    // Verify admin JWT authentication
+    const isAuth = await verifyAdminAuth(request);
+    if (!isAuth) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 

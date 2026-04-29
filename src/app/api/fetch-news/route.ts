@@ -441,6 +441,8 @@ export async function GET(request: NextRequest) {
             body,
             category,
             imageUrl,
+            sourceUrl: item.link || '',
+            source: item.source,
             status: 'published',
             isFeatured: !!isFeatured,
             isBreaking: false,

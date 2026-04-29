@@ -3,10 +3,10 @@ import { Home, Music, Tv, Film, Sparkles, Newspaper, TrendingUp, Globe, Clock, A
 
 export default function AboutPage() {
   const stats = [
-    { icon: Newspaper, value: '50+', label: 'News Sources' },
-    { icon: TrendingUp, value: '116+', label: 'Stories Daily' },
-    { icon: Globe, value: '10+', label: 'African Countries' },
-    { icon: Clock, value: 'Real-time', label: 'Updates' },
+    { icon: Newspaper, value: '36+', label: 'News Sources' },
+    { icon: TrendingUp, value: '24/7', label: 'Auto Updates' },
+    { icon: Globe, value: '8+', label: 'African Countries' },
+    { icon: Clock, value: 'Every 2h', label: 'Refresh Cycle' },
   ]
 
   const coverTopics = [
@@ -68,7 +68,7 @@ export default function AboutPage() {
             <span className="text-[#ff4444]">Entertainment Hub</span>
           </h2>
           <p className="text-[#aaaaaa] mt-4 max-w-xl mx-auto text-sm leading-relaxed">
-            ZamVibe brings you the latest African entertainment news, celebrity gossip, music updates, movie reviews, fashion trends, and viral stories — all in one place. From Lagos to Lusaka, Nairobi to Accra, we&apos;ve got the pulse of African entertainment.
+            ZamVibe brings you the latest African entertainment news, celebrity gossip, music updates, movie reviews, fashion trends, and viral stories — all in one place. Built in Zambia for Africa, we aggregate from 36+ trusted sources including Zambian favourites like Kalemba, Zed Corner, Mwebantu, and Tumfweko alongside top pan-African and global entertainment outlets.
           </p>
         </div>
 
@@ -90,7 +90,7 @@ export default function AboutPage() {
         <div className="bg-[#1a1a1a] rounded-2xl border border-[#272727] p-6 sm:p-8">
           <h3 className="text-xl font-bold text-white mb-4">Our Mission</h3>
           <p className="text-[#aaaaaa] text-sm leading-relaxed">
-            Our mission is to be the pulse of African entertainment. We aggregate stories from over 50 trusted sources across the continent, curating the most relevant and exciting content so you never miss what&apos;s trending. Whether it&apos;s a new album drop from Burna Boy, a Nollywood premiere, or the latest fashion moment from African designers — ZamVibe has you covered.
+            Our mission is to be the definitive destination for African entertainment. We aggregate stories from 36+ trusted sources across the continent — from Zambian favourites like Kalemba and Zed Corner to pan-African giants like BellaNaija and ZAlebs, all the way to global outlets like BET and TMZ. Our smart filtering ensures you only see entertainment content — no politics, no boring infrastructure news.
           </p>
           <p className="text-[#aaaaaa] text-sm leading-relaxed mt-3">
             We believe African entertainment deserves a world-class platform that celebrates the creativity, talent, and culture of the continent. ZamVibe is built for entertainment lovers who want to stay connected to the stories that matter.

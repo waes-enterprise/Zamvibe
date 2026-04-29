@@ -14,6 +14,7 @@ model Post {
   category     String   @default("Viral")
   imageUrl     String   @default("")
   videoUrl     String   @default("")
+  sourceUrl    String   @default("")  // Link to original article
   isBreaking   Boolean  @default(false)
   isFeatured   Boolean  @default(false)
   views        Int      @default(0)
@@ -23,6 +24,11 @@ model Post {
   source       String   @default("")
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+
+  @@index([category])
+  @@index([status])
+  @@index([isFeatured])
+  @@index([createdAt])
 }
 
 model TrendingTopic {
@@ -43,4 +49,23 @@ model VideoClip {
   views     Int      @default(0)
   category  String   @default("Viral")
   createdAt DateTime @default(now())
+}
+
+model ContactSubmission {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  subject   String   @default("")
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model NewsletterSubscription {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  @@index([email])
 }

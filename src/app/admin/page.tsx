@@ -48,7 +48,25 @@ export default function AdminPage() {
   useEffect(() => {
     const token = localStorage.getItem('zamvibe_admin_token');
     if (token) {
-      startTransition(() => setAuthenticated(true));
+      // Verify the token is still valid by checking format
+      try {
+        const parts = token.split('.');
+        if (parts.length === 3) {
+          // JWT format: header.payload.signature
+          const payload = JSON.parse(atob(parts[1]));
+          // Check expiry
+          if (payload.exp && payload.exp * 1000 > Date.now()) {
+            startTransition(() => setAuthenticated(true));
+          } else {
+            localStorage.removeItem('zamvibe_admin_token');
+          }
+        } else {
+          // Old base64 token format — clear it
+          localStorage.removeItem('zamvibe_admin_token');
+        }
+      } catch {
+        localStorage.removeItem('zamvibe_admin_token');
+      }
     }
   }, []);
 
@@ -80,7 +98,7 @@ export default function AdminPage() {
   };
 
   // Helper to get auth headers for API calls
-  const getAuthHeaders = () => {
+  const getAuthHeaders = (): Record<string, string> => {
     const token = localStorage.getItem('zamvibe_admin_token');
     return token ? { 'Authorization': `Bearer ${token}` } : {};
   };
@@ -138,11 +156,26 @@ export default function AdminPage() {
   const handleToggleFeatured = async (post: Post) => {
     try {
       await fetch('/api/posts', {
-        method: 'POST',
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
-        body: JSON.stringify({ ...post, isFeatured: !post.isFeatured }),
+        body: JSON.stringify({ id: post.id, isFeatured: !post.isFeatured }),
       });
       toast.success(post.isFeatured ? 'Removed from featured' : 'Added to featured!');
+      fetchPosts();
+    } catch {
+      toast.error('Failed to update');
+    }
+  };
+
+  // Toggle breaking
+  const handleToggleBreaking = async (post: Post) => {
+    try {
+      await fetch('/api/posts', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+        body: JSON.stringify({ id: post.id, isBreaking: !post.isBreaking }),
+      });
+      toast.success(post.isBreaking ? 'Removed from breaking' : 'Marked as breaking!');
       fetchPosts();
     } catch {
       toast.error('Failed to update');
@@ -360,6 +393,13 @@ export default function AdminPage() {
                             title={post.isFeatured ? 'Unfeature' : 'Feature'}
                           >
                             <Star className={`w-4 h-4 ${post.isFeatured ? 'text-yellow-500 fill-yellow-500' : 'text-gray-500'}`} />
+                          </button>
+                          <button
+                            onClick={() => handleToggleBreaking(post)}
+                            className="p-1.5 rounded-lg hover:bg-gray-700 transition"
+                            title={post.isBreaking ? 'Unmark breaking' : 'Mark as breaking'}
+                          >
+                            <Flame className={`w-4 h-4 ${post.isBreaking ? 'text-orange-500' : 'text-gray-500'}`} />
                           </button>
                           <button
                             onClick={() => handleDeletePost(post.id)}
