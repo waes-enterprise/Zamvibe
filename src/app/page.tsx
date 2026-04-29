@@ -47,6 +47,23 @@ interface VideoClip {
   createdAt: string;
 }
 
+interface LiveTrendingItem {
+  title: string;
+  source: string;
+  category: string;
+  url: string;
+  engagement?: string;
+  timestamp: string;
+}
+
+interface LiveTrendingData {
+  zambiaTrends: LiveTrendingItem[];
+  nigeriaTrends: LiveTrendingItem[];
+  southAfricaTrends: LiveTrendingItem[];
+  entertainmentHeadlines: LiveTrendingItem[];
+  musicTrends: LiveTrendingItem[];
+}
+
 // ===================== HELPERS =====================
 const CATEGORY_COLORS: Record<string, string> = {
   Music: '#a855f7', Celebrity: '#3ea6ff', Gossip: '#f59e0b', Viral: '#ef4444',
@@ -595,6 +612,134 @@ function EmptyState() {
   );
 }
 
+// Live Trending Section (from Google Trends + Social)
+function LiveTrendingSection({ data }: { data: LiveTrendingData | null }) {
+  if (!data) return null;
+
+  const allTrends = [
+    ...(data.zambiaTrends || []).map(t => ({ ...t, region: '🇿🇲 Zambia' })),
+    ...(data.nigeriaTrends || []).map(t => ({ ...t, region: '🇳🇬 Nigeria' })),
+    ...(data.southAfricaTrends || []).map(t => ({ ...t, region: '🇿🇦 South Africa' })),
+  ];
+
+  const entertainment = data.entertainmentHeadlines || [];
+  const music = data.musicTrends || [];
+
+  if (allTrends.length === 0 && entertainment.length === 0 && music.length === 0) return null;
+
+  return (
+    <section className="px-4 py-4 space-y-4">
+      {/* Google Trends by Region */}
+      {allTrends.length > 0 && (
+        <div>
+          <h2 className="text-base font-bold text-[#f1f1f1] flex items-center gap-2 mb-3">
+            <Flame className="w-5 h-5 text-[#ff4444]" />
+            Live Trending Now
+            <span className="flex items-center gap-1 ml-auto">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#ff4444] animate-pulse-live" />
+              <span className="text-[10px] text-[#666]">LIVE</span>
+            </span>
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+            {allTrends.slice(0, 12).map((item, i) => (
+              <a
+                key={`${item.source}-${item.title}-${i}`}
+                href={item.url !== '#' ? item.url : undefined}
+                target={item.url !== '#' ? '_blank' : undefined}
+                rel="noopener noreferrer"
+                className="flex items-start gap-2.5 py-2 px-3 rounded-lg bg-[#1a1a1a] border border-[#272727] hover:border-[#404040] hover:bg-[#222] transition-colors group"
+              >
+                <span className="text-xs font-bold text-[#555] group-hover:text-[#ff4444] transition-colors w-5 shrink-0 text-right">
+                  {i + 1}
+                </span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-medium text-[#f1f1f1] group-hover:text-white transition-colors line-clamp-2 leading-snug">
+                    {item.title}
+                  </p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-[9px] text-[#666]">{item.region}</span>
+                    {item.engagement && (
+                      <span className="text-[9px] text-[#888]">{item.engagement}</span>
+                    )}
+                  </div>
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Entertainment Headlines from RSS */}
+      {entertainment.length > 0 && (
+        <div>
+          <h2 className="text-base font-bold text-[#f1f1f1] flex items-center gap-2 mb-3">
+            <MessageCircle className="w-5 h-5 text-[#a855f7]" />
+            Entertainment Headlines
+            <span className="text-[10px] text-[#666] ml-auto">{entertainment.length} stories</span>
+          </h2>
+          <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2">
+            {entertainment.slice(0, 15).map((item, i) => (
+              <a
+                key={`ent-${item.source}-${i}`}
+                href={item.url !== '#' ? item.url : undefined}
+                target={item.url !== '#' ? '_blank' : undefined}
+                rel="noopener noreferrer"
+                className="shrink-0 w-[280px] sm:w-[320px] p-3 rounded-xl bg-[#1a1a1a] border border-[#272727] hover:border-[#404040] hover:bg-[#222] transition-colors group"
+              >
+                <div className="flex items-center gap-2 mb-1.5">
+                  <span
+                    className="px-1.5 py-0.5 text-[9px] font-bold uppercase rounded"
+                    style={{
+                      backgroundColor: (CATEGORY_COLORS[item.category] || '#ff4444') + 'CC',
+                      color: '#fff',
+                    }}
+                  >
+                    {item.category}
+                  </span>
+                  <span className="text-[10px] text-[#666]">{item.source}</span>
+                </div>
+                <p className="text-xs font-semibold text-[#f1f1f1] group-hover:text-[#3ea6ff] transition-colors line-clamp-2 leading-snug">
+                  {item.title}
+                </p>
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Music Trends */}
+      {music.length > 0 && (
+        <div>
+          <h2 className="text-base font-bold text-[#f1f1f1] flex items-center gap-2 mb-3">
+            <Music className="w-5 h-5 text-[#a855f7]" />
+            Music Trends
+            <span className="text-[10px] text-[#666] ml-auto">via Billboard</span>
+          </h2>
+          <div className="space-y-1">
+            {music.slice(0, 8).map((item, i) => (
+              <a
+                key={`music-${i}`}
+                href={item.url !== '#' ? item.url : undefined}
+                target={item.url !== '#' ? '_blank' : undefined}
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 py-2 px-3 rounded-lg hover:bg-[#1a1a1a] transition-colors group"
+              >
+                <span className="text-sm font-bold text-[#555] group-hover:text-[#a855f7] transition-colors w-6 text-center">
+                  {i + 1}
+                </span>
+                <p className="text-xs font-medium text-[#f1f1f1] group-hover:text-[#3ea6ff] transition-colors line-clamp-1 flex-1">
+                  {item.title}
+                </p>
+                <span className="text-[10px] text-[#666] shrink-0">{item.source}</span>
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+    </section>
+  );
+}
+
 // Mobile Bottom Nav
 function MobileBottomNav({ activeTab, onChange }: { activeTab: string; onChange: (tab: string) => void }) {
   const tabs = [
@@ -630,6 +775,7 @@ export default function ZamVibePage() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [trendingTopics, setTrendingTopics] = useState<TrendingTopic[]>([]);
   const [videoClips, setVideoClips] = useState<VideoClip[]>([]);
+  const [liveTrending, setLiveTrending] = useState<LiveTrendingData | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
@@ -693,10 +839,11 @@ export default function ZamVibePage() {
     const load = async () => {
       setLoading(true);
       try {
-        const [postsRes, trendingRes, videosRes] = await Promise.allSettled([
+        const [postsRes, trendingRes, videosRes, liveRes] = await Promise.allSettled([
           fetch('/api/posts?limit=50'),
           fetch('/api/posts/trending'),
           fetch('/api/videos'),
+          fetch('/api/trending-live'),
         ]);
         if (cancelled) return;
         if (postsRes.status === 'fulfilled' && postsRes.value.ok) {
@@ -710,6 +857,10 @@ export default function ZamVibePage() {
         if (videosRes.status === 'fulfilled' && videosRes.value.ok) {
           const data = await videosRes.value.json();
           setVideoClips(data.videos || []);
+        }
+        if (liveRes.status === 'fulfilled' && liveRes.value.ok) {
+          const data = await liveRes.value.json();
+          setLiveTrending(data.data || null);
         }
       } catch {
         // Silently fail
@@ -801,6 +952,9 @@ export default function ZamVibePage() {
 
         {/* Video Section */}
         <VideoSection clips={videoClips} />
+
+        {/* Live Trending from Google Trends + Entertainment Sources */}
+        <LiveTrendingSection data={liveTrending} />
 
         {/* Two-column layout on desktop */}
         <div className="flex gap-6 px-4 mt-2">
