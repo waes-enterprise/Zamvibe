@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Footer } from '@/components/footer';
 
 // ===================== TYPES =====================
 interface Post {
@@ -702,11 +703,11 @@ export default function ZamVibePage() {
         }
         if (trendingRes.status === 'fulfilled' && trendingRes.value.ok) {
           const data = await trendingRes.value.json();
-          setTrendingTopics(data.topics || []);
+          setTrendingTopics(data.trendingTopics || []);
         }
         if (videosRes.status === 'fulfilled' && videosRes.value.ok) {
           const data = await videosRes.value.json();
-          setVideoClips(data.clips || []);
+          setVideoClips(data.videos || []);
         }
       } catch {
         // Silently fail
@@ -721,7 +722,7 @@ export default function ZamVibePage() {
   const handleFetchNews = async () => {
     setFetching(true);
     try {
-      await fetch('/api/fetch-news?key=zamvibe-fetch-2025', { method: 'POST' });
+      await fetch('/api/admin/fetch-news', { method: 'POST' });
       fetchInitialData();
     } catch {}
     setFetching(false);
@@ -843,6 +844,9 @@ export default function ZamVibePage() {
 
       {/* Post Modal */}
       <PostModal post={selectedPost} open={modalOpen} onClose={() => setModalOpen(false)} />
+
+      {/* Footer */}
+      <Footer />
 
       {/* Mobile Bottom Nav */}
       <MobileBottomNav activeTab={mobileTab} onChange={handleMobileTab} />

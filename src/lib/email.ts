@@ -1,5 +1,5 @@
 /**
- * Housemate ZM — Email Notification System
+ * ZamVibe — Email Notification System
  *
  * When EMAIL_API_KEY is set, emails are sent via Resend-compatible API.
  * When it is not set, all functions are no-ops that log to console
@@ -8,9 +8,9 @@
 
 // ─── Config ────────────────────────────────────────────────────────────
 const API_KEY = process.env.EMAIL_API_KEY
-const FROM = process.env.EMAIL_FROM || 'noreply@housemate.zm'
+const FROM = process.env.EMAIL_FROM || 'noreply@zamvibe.com'
 const RESEND_API = 'https://api.resend.com/emails'
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://housemate.zm'
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://zamvibe.vercel.app'
 
 const isEnabled = () => Boolean(API_KEY)
 
@@ -52,24 +52,24 @@ function buildEmailHtml(content: string): string {
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Housemate ZM</title>
+  <title>ZamVibe</title>
 </head>
-<body style="margin:0;padding:0;background-color:#f4f4f5;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f5;padding:32px 16px;">
+<body style="margin:0;padding:0;background-color:#0f0f0f;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#0f0f0f;padding:32px 16px;">
     <tr>
       <td align="center">
-        <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
+        <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="background-color:#1a1a1a;border-radius:8px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.3);">
 
-          <!-- Green Header -->
+          <!-- Header -->
           <tr>
-            <td style="background-color:#006633;padding:24px 32px;text-align:center;">
+            <td style="background-color:#ff4444;padding:24px 32px;text-align:center;">
               <h1 style="margin:0;color:#ffffff;font-size:24px;font-weight:700;letter-spacing:-0.5px;">
-                🏠 Housemate ZM
+                🎬 ZamVibe
               </h1>
             </td>
           </tr>
 
-          <!-- White Content -->
+          <!-- Content -->
           <tr>
             <td style="padding:32px;">
               ${content}
@@ -78,13 +78,12 @@ function buildEmailHtml(content: string): string {
 
           <!-- Footer -->
           <tr>
-            <td style="padding:16px 32px 24px;text-align:center;border-top:1px solid #e4e4e7;">
-              <p style="margin:0;color:#71717a;font-size:13px;">
-                Housemate ZM &mdash; Zambia's Premier Property Marketplace
+            <td style="padding:16px 32px 24px;text-align:center;border-top:1px solid #272727;">
+              <p style="margin:0;color:#aaaaaa;font-size:13px;">
+                ZamVibe &mdash; Africa&apos;s #1 Entertainment Hub
               </p>
-              <p style="margin:8px 0 0;color:#a1a1aa;font-size:12px;">
-                You received this email because you signed up on Housemate ZM.
-                <a href="${APP_URL}/settings" style="color:#006633;text-decoration:underline;">Unsubscribe</a>
+              <p style="margin:8px 0 0;color:#666666;font-size:12px;">
+                You received this email because you signed up on ZamVibe.
               </p>
             </td>
           </tr>
@@ -107,18 +106,18 @@ function stars(rating: number): string {
 /** Welcome email sent after registration */
 export function sendWelcomeEmail(name: string, email: string): void {
   const html = buildEmailHtml(/* html */ `
-    <h2 style="margin:0 0 16px;font-size:20px;color:#18181b;">Welcome to Housemate ZM, ${escapeHtml(name)}!</h2>
-    <p style="margin:0 0 16px;color:#3f3f46;font-size:15px;line-height:1.6;">
-      Thank you for creating your account. You're now part of Zambia's fastest-growing property marketplace.
+    <h2 style="margin:0 0 16px;font-size:20px;color:#ffffff;">Welcome to ZamVibe, ${escapeHtml(name)}!</h2>
+    <p style="margin:0 0 16px;color:#aaaaaa;font-size:15px;line-height:1.6;">
+      Thank you for joining ZamVibe — Africa&apos;s #1 entertainment hub.
     </p>
-    <p style="margin:0 0 24px;color:#3f3f46;font-size:15px;line-height:1.6;">
-      Whether you're looking to rent, buy, or sell — we've got you covered.
+    <p style="margin:0 0 24px;color:#aaaaaa;font-size:15px;line-height:1.6;">
+      Stay tuned for the latest in music, celebrity gossip, movies, fashion, and viral trends.
     </p>
     <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto;">
       <tr>
-        <td style="background-color:#006633;border-radius:6px;">
+        <td style="background-color:#ff4444;border-radius:6px;">
           <a href="${APP_URL}" style="display:inline-block;padding:12px 24px;color:#ffffff;font-weight:600;font-size:14px;text-decoration:none;">
-            Browse Listings
+            Start Exploring
           </a>
         </td>
       </tr>
@@ -126,7 +125,7 @@ export function sendWelcomeEmail(name: string, email: string): void {
   `)
 
   // Fire-and-forget
-  sendEmail(email, 'Welcome to Housemate ZM! 🏠', html).catch(() => {})
+  sendEmail(email, 'Welcome to ZamVibe! 🎬', html).catch(() => {})
 }
 
 /** New-message notification for the recipient of a conversation */
@@ -137,16 +136,16 @@ export function sendNewMessageNotification(
   listingTitle: string,
 ): void {
   const html = buildEmailHtml(/* html */ `
-    <h2 style="margin:0 0 16px;font-size:20px;color:#18181b;">New Message 💬</h2>
-    <p style="margin:0 0 16px;color:#3f3f46;font-size:15px;line-height:1.6;">
+    <h2 style="margin:0 0 16px;font-size:20px;color:#ffffff;">New Message 💬</h2>
+    <p style="margin:0 0 16px;color:#aaaaaa;font-size:15px;line-height:1.6;">
       <strong>${escapeHtml(senderName)}</strong> started a conversation with you about:
     </p>
-    <blockquote style="margin:0 0 24px;padding:12px 16px;border-left:4px solid #006633;background-color:#f0fdf4;border-radius:0 4px 4px 0;">
-      <p style="margin:0;color:#18181b;font-size:15px;">${escapeHtml(listingTitle)}</p>
+    <blockquote style="margin:0 0 24px;padding:12px 16px;border-left:4px solid #ff4444;background-color:#ff4444/10;border-radius:0 4px 4px 0;">
+      <p style="margin:0;color:#ffffff;font-size:15px;">${escapeHtml(listingTitle)}</p>
     </blockquote>
     <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto;">
       <tr>
-        <td style="background-color:#006633;border-radius:6px;">
+        <td style="background-color:#ff4444;border-radius:6px;">
           <a href="${APP_URL}/inbox" style="display:inline-block;padding:12px 24px;color:#ffffff;font-weight:600;font-size:14px;text-decoration:none;">
             Open Inbox
           </a>
@@ -170,17 +169,17 @@ export function sendNewReviewNotification(
   rating: number,
 ): void {
   const html = buildEmailHtml(/* html */ `
-    <h2 style="margin:0 0 16px;font-size:20px;color:#18181b;">New Review ⭐</h2>
-    <p style="margin:0 0 16px;color:#3f3f46;font-size:15px;line-height:1.6;">
+    <h2 style="margin:0 0 16px;font-size:20px;color:#ffffff;">New Review ⭐</h2>
+    <p style="margin:0 0 16px;color:#aaaaaa;font-size:15px;line-height:1.6;">
       Your listing just received a new review!
     </p>
-    <blockquote style="margin:0 0 24px;padding:12px 16px;border-left:4px solid #006633;background-color:#f0fdf4;border-radius:0 4px 4px 0;">
-      <p style="margin:0 0 4px;color:#18181b;font-size:15px;font-weight:600;">${escapeHtml(listingTitle)}</p>
-      <p style="margin:0;color:#006633;font-size:18px;">${stars(rating)}</p>
+    <blockquote style="margin:0 0 24px;padding:12px 16px;border-left:4px solid #ff4444;background-color:#ff4444/10;border-radius:0 4px 4px 0;">
+      <p style="margin:0 0 4px;color:#ffffff;font-size:15px;font-weight:600;">${escapeHtml(listingTitle)}</p>
+      <p style="margin:0;color:#ff4444;font-size:18px;">${stars(rating)}</p>
     </blockquote>
     <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto;">
       <tr>
-        <td style="background-color:#006633;border-radius:6px;">
+        <td style="background-color:#ff4444;border-radius:6px;">
           <a href="${APP_URL}/listings" style="display:inline-block;padding:12px 24px;color:#ffffff;font-weight:600;font-size:14px;text-decoration:none;">
             View Listing
           </a>
@@ -203,16 +202,16 @@ export function sendListingApprovedEmail(
   listingTitle: string,
 ): void {
   const html = buildEmailHtml(/* html */ `
-    <h2 style="margin:0 0 16px;font-size:20px;color:#18181b;">Listing Approved ✅</h2>
-    <p style="margin:0 0 16px;color:#3f3f46;font-size:15px;line-height:1.6;">
-      Great news, ${escapeHtml(name)}! Your listing has been approved and is now live on Housemate ZM.
+    <h2 style="margin:0 0 16px;font-size:20px;color:#ffffff;">Listing Approved ✅</h2>
+    <p style="margin:0 0 16px;color:#aaaaaa;font-size:15px;line-height:1.6;">
+      Great news, ${escapeHtml(name)}! Your listing has been approved and is now live on ZamVibe.
     </p>
-    <blockquote style="margin:0 0 24px;padding:12px 16px;border-left:4px solid #006633;background-color:#f0fdf4;border-radius:0 4px 4px 0;">
-      <p style="margin:0;color:#18181b;font-size:15px;">${escapeHtml(listingTitle)}</p>
+    <blockquote style="margin:0 0 24px;padding:12px 16px;border-left:4px solid #ff4444;background-color:#ff4444/10;border-radius:0 4px 4px 0;">
+      <p style="margin:0;color:#ffffff;font-size:15px;">${escapeHtml(listingTitle)}</p>
     </blockquote>
     <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto;">
       <tr>
-        <td style="background-color:#006633;border-radius:6px;">
+        <td style="background-color:#ff4444;border-radius:6px;">
           <a href="${APP_URL}/listings" style="display:inline-block;padding:12px 24px;color:#ffffff;font-weight:600;font-size:14px;text-decoration:none;">
             View My Listings
           </a>
@@ -235,19 +234,19 @@ export function sendPasswordResetEmail(
   resetCode: string,
 ): void {
   const html = buildEmailHtml(/* html */ `
-    <h2 style="margin:0 0 16px;font-size:20px;color:#18181b;">Password Reset 🔐</h2>
-    <p style="margin:0 0 16px;color:#3f3f46;font-size:15px;line-height:1.6;">
+    <h2 style="margin:0 0 16px;font-size:20px;color:#ffffff;">Password Reset 🔐</h2>
+    <p style="margin:0 0 16px;color:#aaaaaa;font-size:15px;line-height:1.6;">
       Hi ${escapeHtml(name)}, we received a request to reset your password. Use the code below to proceed.
     </p>
     <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto 24px;">
       <tr>
-        <td style="background-color:#f4f4f5;border-radius:8px;padding:16px 32px;text-align:center;">
-          <span style="font-size:32px;font-weight:700;letter-spacing:8px;color:#18181b;">${escapeHtml(resetCode)}</span>
+        <td style="background-color:#272727;border-radius:8px;padding:16px 32px;text-align:center;">
+          <span style="font-size:32px;font-weight:700;letter-spacing:8px;color:#ffffff;">${escapeHtml(resetCode)}</span>
         </td>
       </tr>
     </table>
-    <p style="margin:0 0 8px;color:#71717a;font-size:13px;line-height:1.5;">
-      This code expires in <strong>15 minutes</strong>. If you didn't request this, you can safely ignore this email.
+    <p style="margin:0 0 8px;color:#666666;font-size:13px;line-height:1.5;">
+      This code expires in <strong>15 minutes</strong>. If you didn&apos;t request this, you can safely ignore this email.
     </p>
   `)
 

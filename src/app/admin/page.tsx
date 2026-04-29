@@ -10,8 +10,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 
-const ADMIN_PASSWORD = 'zamvibe2025';
-
 interface Post {
   id: string;
   headline: string;
@@ -48,27 +46,43 @@ export default function AdminPage() {
 
   // Auth
   useEffect(() => {
-    const auth = localStorage.getItem('zamvibe_admin');
-    if (auth === 'true') {
+    const token = localStorage.getItem('zamvibe_admin_token');
+    if (token) {
       startTransition(() => setAuthenticated(true));
     }
   }, []);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === ADMIN_PASSWORD) {
-      localStorage.setItem('zamvibe_admin', 'true');
-      setAuthenticated(true);
-      toast.success('Welcome to ZamVibe Admin!');
-      fetchPosts();
-    } else {
-      toast.error('Wrong password!');
+    try {
+      const res = await fetch('/api/admin/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        localStorage.setItem('zamvibe_admin_token', data.token);
+        setAuthenticated(true);
+        toast.success('Welcome to ZamVibe Admin!');
+        fetchPosts();
+      } else {
+        toast.error(data.error || 'Wrong password!');
+      }
+    } catch {
+      toast.error('Login failed');
     }
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('zamvibe_admin');
+    localStorage.removeItem('zamvibe_admin_token');
     setAuthenticated(false);
+  };
+
+  // Helper to get auth headers for API calls
+  const getAuthHeaders = () => {
+    const token = localStorage.getItem('zamvibe_admin_token');
+    return token ? { 'Authorization': `Bearer ${token}` } : {};
   };
 
   // Fetch posts
@@ -93,7 +107,7 @@ export default function AdminPage() {
     setFetching(true);
     setFetchResult(null);
     try {
-      const res = await fetch('/api/fetch-news?key=zamvibe-fetch-2025', { method: 'POST' });
+      const res = await fetch('/api/admin/fetch-news', { method: 'POST' });
       const data = await res.json();
       setFetchResult(data);
       if (data.success) {
@@ -112,7 +126,7 @@ export default function AdminPage() {
   const handleDeletePost = async (id: string) => {
     if (!confirm('Delete this post?')) return;
     try {
-      await fetch(`/api/posts/${id}`, { method: 'DELETE' });
+      await fetch(`/api/posts/${id}`, { method: 'DELETE', headers: getAuthHeaders() });
       toast.success('Post deleted');
       fetchPosts();
     } catch {
@@ -125,7 +139,7 @@ export default function AdminPage() {
     try {
       await fetch('/api/posts', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
         body: JSON.stringify({ ...post, isFeatured: !post.isFeatured }),
       });
       toast.success(post.isFeatured ? 'Removed from featured' : 'Added to featured!');
@@ -146,7 +160,7 @@ export default function AdminPage() {
     try {
       const res = await fetch('/api/posts', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
         body: JSON.stringify(createForm),
       });
       if (res.ok) {

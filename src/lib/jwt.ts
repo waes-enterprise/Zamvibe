@@ -1,7 +1,7 @@
 import { SignJWT, jwtVerify } from 'jose'
 
 const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || 'housemate-zm-secret-key-change-in-production'
+  process.env.JWT_SECRET || 'zamvibe-secret-key-change-in-production'
 )
 
 export interface JWTPayload {

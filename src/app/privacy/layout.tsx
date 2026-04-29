@@ -2,7 +2,7 @@ import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
-  description: "How Housemate ZM handles your data",
+  description: "How ZamVibe handles your data and privacy",
 };
 
 export default function PrivacyLayout({

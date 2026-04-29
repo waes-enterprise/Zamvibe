@@ -1,9 +1,9 @@
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "About Us",
+  title: "About ZamVibe",
   description:
-    "Learn about Housemate ZM — Zambia's premier property marketplace",
+    "Learn about ZamVibe — Africa's #1 entertainment hub for music, celebrity gossip, and viral stories.",
 };
 
 export default function AboutLayout({
